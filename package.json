@@ -1,0 +1,21 @@
+{
+  "name": "gplus-pounder",
+  "version": "1.0.0",
+  "description": "Harvests posts and comments from G+ and puts them into Slack",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha",
+    "seed": "seed/seeder.js"
+  },
+  "author": "",
+  "license": "GNU GPL 3.0",
+  "dependencies": {
+    "googleapis": "^2.1.7",
+    "moment": "^2.11.2"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "fs": "0.0.2",
+    "sinon": "^1.17.3"
+  }
+}
