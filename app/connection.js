@@ -21,6 +21,7 @@ const fileDescriptor = fs.openSync("logs/output.txt", 'w');
 function App(apiKey, user) {
   const userId = JSON.parse(user);
 
+  //console.log("\"Parsing\" user... " + user);
   //return; // Don't exercise the Google API right now
 
   var request = plus.activities.list({
