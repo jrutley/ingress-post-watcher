@@ -66,12 +66,11 @@ const app = (apiKey, user) => {
       // }
     }
     const output = moment().format('h:mm:ss a') + " " + userId.username + " " + " Fail count: " + counts.failCount + " Success count: " + counts.successCount + " " + apiKey;
-
     console.log(output);
 
     if(err !== null && counts.failCount < 50){
-      fs.write(fileDescriptor, output+"\n", ()=>{
-        console.log("wrote to file\n");
+      fs.write(fileDescriptor, output + "\n", ()=>{
+        console.log("wrote to file");
       })
     }
   });
@@ -94,10 +93,10 @@ var subscription = source.subscribe(
   },
   err => {
     console.log('Error: ' + err);
-    redis.close();
+    redis.close(connection);
   },
   () => {
     console.log('Completed');
-    redis.close();
+    redis.close(connection);
   }
 );
