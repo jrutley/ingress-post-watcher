@@ -4,13 +4,13 @@ const redis = require('redis');
 var connection = null;
 
 function open(server, port, pass) {
-  console.log("REDIS: Opening connection");
-  connection = redis.createClient({
+  const args = {
     port: port || envVars.REDIS_PORT,
     host: server || envVars.REDIS_SERVER
-  });
+  };
+  connection = redis.createClient(args);
 
-  console.log("REDIS: open: " + connection);
+  console.log("REDIS: open on " + args.host + ":"+ args.port);
 
   connection.auth(pass || envVars.REDIS_PASS);
   return connection;
