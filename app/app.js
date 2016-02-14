@@ -1,6 +1,6 @@
 const Rx = require('rx');
 const redis = require('../libs/redis-access.js');
-const app = require('./connection.js');
+const app = require('./logic.js');
 const envVars = require('../env.conf.json');
 
 var source = Rx.Observable
@@ -13,16 +13,15 @@ var subscription = source.subscribe(
   next => {
     if(connection === null){
       connection = redis.open();
-      connection.on("error", function(err){
-        console.log("APP connection error: " + err);
-        // if(connection !== null){
-        //   connection.quit();
-        // }
-        // connection = null;
-      });
-      connection.on("reconnecting", (r) => {
+
+      Rx.Observable.fromEvent(connection, "connect").subscribe(c=>{console.log("APP connect")});
+      //Rx.Observable.fromEvent(connection, "idle").subscribe(i=>{console.log("APP redis idle")});
+      Rx.Observable.fromEvent(connection, "reconnecting").subscribe(r => {
         console.log("APP reconnecting... Delay: " + r.delay + "ms Attempt: "+ r.attempt);
-      })
+      });
+      Rx.Observable.fromEvent(connection, "error").subscribe(e=>{console.log("APP redis error: " + e)});
+      Rx.Observable.fromEvent(connection, "end").subscribe(e=>{console.log("APP redis end")});
+      Rx.Observable.fromEvent(connection, "drain").subscribe(d=>{console.log("APP redis drain")});
     }
     redis.retrieve(connection, "users", (value)=>{
       app(apiKeys[next.value % apiKeys.length], value);
