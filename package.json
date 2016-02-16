@@ -11,6 +11,7 @@
   "license": "GNU GPL 3.0",
   "dependencies": {
     "googleapis": "^2.1.7",
+    "jshint": "^2.9.1",
     "moment": "^2.11.2"
   },
   "devDependencies": {
