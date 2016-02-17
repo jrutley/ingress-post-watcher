@@ -2,11 +2,15 @@ var chai = require("chai");
 var sinon = require("sinon");
 var Processing = require("../libs/processing.js");
 var assert = require("assert");
-
 chai.should();
 
 
-// items: [
+// {
+//  "kind": "plus#activityFeed",
+//  "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/-ZQteVBcDimqYB954Hv7_NcGkpI\"",
+//  "title": "Google+ List of Activities for Collection PUBLIC",
+//  "updated": "2015-12-11T19:45:31.331Z",
+//  "items": [
 var sample = {
   "kind": "plus#activity",
   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/3GC4S3wIYUJAHbO1WBNVMtN-O9s\"",
@@ -90,8 +94,6 @@ var sample = {
 //  if the reply count has changed for a given post, comments.list sort by descending all comments from now until last updated date filtered to ADA
 //      post ADA's comment to Slack
 
-
-
 // Go to Redis and retrieve the next person to query
 // Query Redis for that individual's record
 // Pass that record into this function
@@ -100,37 +102,55 @@ describe('Given that we have received the next user from Redis', function(){
   // We have made a call to Redis, and it returned our user
   const returnedUser = "+ADetectionAlgorithmADA";
 
+  var redis = {
+    hgetall: function(key, response){}
+  }
+
+  var gplus = {
+    activities: {
+      list: function(params, callback){}
+    }
+  };
+
+  it('should retrieve the activity list from G+', function(){
+    sinon.spy(gplus.activities, 'list');
+
+    const processing = new Processing(redis, gplus);
+    processing.getDetails(returnedUser);
+    assert(gplus.activities.list.calledWith({
+      'userId' : returnedUser,
+      'collection' : 'public'
+    }));
+    gplus.activities.list.restore()
+  });
+
   describe('When an individual record was not found', ()=> {
-    // Use sinon to have a call to "redis" return "not found"/"null" for a given key
-    var redis = sinon.spy();
-    redis.set = sinon.spy();
-    var gplus = {
-      activities: {
-        list: function(params, callback){}
-      }
-    };
 
-    it('should retrieve the comment list from G+', function(){
-      sinon.spy(gplus.activities, 'list');
-
-      const processing = new Processing(redis, gplus);
-      processing.getDetails(returnedUser);
-      assert(gplus.activities.list.calledWith({
-        'userId' : returnedUser,
-        'collection' : 'public'
-      }));
+    beforeEach(function() {
+      redis.hmset = sinon.spy();
+      sinon.stub(redis, 'hgetall', function(key, replies){
+        replies(null, null)
+      })
     });
 
-    it('should generate a new one with the results from the g+ comment list', function(){
+    it('should insert a new redis hash with the results from the g+ comment list', function(){
       sinon.stub(gplus.activities, 'list', function(params, callback) {
-        console.log("Stub called here. params is <<" + params +">> and callback is <<"+callback+">>");
         callback(null, sample);
       });
       const processing = new Processing(redis, gplus);
 
       processing.getDetails(returnedUser);
 
-      assert(redis.set.calledWith(sample));
+      // Should do two items here
+      sinon.assert.calledWith(redis.hmset,
+        returnedUser,
+        // How do I want to store this?
+        // commentid, # of replies, post update date?
+        'postId', sample.id,
+        'replies', sample.object.replies.totalItems,
+        'postDate', sample.updated
+      );
+
       // Expect that redis.set gets called with the user and a newly initialized key
       // const processing = new Processing(redis, gplus);
       // const expectedValue = {}
@@ -143,11 +163,60 @@ describe('Given that we have received the next user from Redis', function(){
       // processing.getDetails(data).should.return(expected);
     });
 
-    // beforeEach(function() {
-    // });
+    it.skip('should post to the G+ hangout that the bot is starting up', function(){
+
+    })
+
     afterEach(function() {
       gplus.activities.list.restore();
+      redis.hgetall.restore();
     });
 
   });
+  describe('When a record was found', function() {
+    // redis.hgetall returns
+    // 1) key1
+    // 2) value1
+    // 3) key2
+    // 4) value2
+
+    beforeEach(function() {
+      redis.hmset = sinon.spy();
+      sinon.stub(redis, 'hgetall', function(key, response){
+        var data =
+        {
+          postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
+          replies: 69,
+          postDate: '2015-12-11T19:45:31.331Z'
+        };
+        response(null, data);
+      });
+      sinon.stub(gplus.activities, 'list', function(params, callback) {
+        callback(null, sample);
+      });
+    });
+
+    afterEach(function() {
+      gplus.activities.list.restore();
+      redis.hgetall.restore();
+    });
+
+    describe('and there are no new replies', function(){
+      it('will not update redis with any values', function(){
+        const processing = new Processing(redis, gplus);
+        processing.getDetails(returnedUser);
+
+        sinon.assert.notCalled(redis.hmset);
+      })
+    })
+
+    // Use that to iterate through all the values to find any reply updates, or if there are any posts that are not new
+    describe.skip('and when there is a new post', function() {
+      it('should paste the post to the G+ group', function(){
+
+      })
+      it('should add the new post into the redis hash', function(){
+      })
+    })
+  })
 });
