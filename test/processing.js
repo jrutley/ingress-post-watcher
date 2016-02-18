@@ -24,6 +24,8 @@ describe('Given that we have received the next user from Redis', function(){
 
   var redis = {
     hgetall: function(key, response){},
+    lrange: function(key, min, max, response){},
+    lpush: function(key, value, response){},
     hmset: function(key, args){}
   }
 
@@ -50,38 +52,45 @@ describe('Given that we have received the next user from Redis', function(){
 
     describe('When an individual record was not found in the keystore', ()=> {
 
-      var before = function() {
+      beforeEach(function() {
         redis.hmset = sinon.spy();
-        sinon.stub(redis, 'hgetall', function(key, replies){
-          replies(null, null)
+        //sinon.stub(redis, 'lpush', function(key, value)
+        redis.lpush = sinon.spy()
+        sinon.stub(redis, 'lrange', function(key, min, max, replies){
+          replies(null, undefined)
         });
+        // sinon.stub(redis, 'hgetall', function(key, replies){
+        //   replies(null, null)
+        // });
 
         sinon.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedSingle);
         });
-      };
+      });
 
-      var after = function() {
-        gplus.activities.list.restore();
-        redis.hgetall.restore();
-      };
+      afterEach(function() {
+        gplus.activities.list.restore()
+        //redis.lpush.restore()
+        redis.lrange.restore()
+        // redis.hgetall.restore()
+      });
 
       it('should insert a new redis hash with the results from the g+ comment list', function(){
-        before()
 
         const processing = new Processing(redis, gplus);
 
         processing.getDetails(returnedUser);
 
         // Should do two items here
+        sinon.assert.calledWith(redis.lpush,
+          returnedUser, activityFeedSingle.items[0].id
+        );
         sinon.assert.calledWith(redis.hmset,
-          returnedUser,
-          'postId', activityFeedSingle.items[0].id,
+          activityFeedSingle.items[0].id,
           'replies', activityFeedSingle.items[0].object.replies.totalItems,
           'postDate', activityFeedSingle.items[0].updated
         );
 
-        after()
         // Expect that redis.set gets called with the user and a newly initialized key
         // const processing = new Processing(redis, gplus);
         // const expectedValue = {}
@@ -174,11 +183,15 @@ describe('Given that we have received the next user from Redis', function(){
       // Use that to iterate through all the values to find any reply updates, or if there are any posts that are not new
       describe('and when there is a new post', function() {
         // We know this because it's not in the k/v list
-        var before = function() {
+        beforeEach(function() {
+          sinon.stub(redis, 'lrange', function(key, min, max, response){
+            response(null, activityFeedMulti.items[0].id)
+          }).withArgs(returnedUser, 0, 1)
+
           sinon.stub(redis, 'hgetall', function(key, response){
             var data =
             {
-              postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
+              //this is now the key:      postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
               replies: 69,
               postDate: '2015-12-11T19:45:31.331Z'
             };
@@ -187,22 +200,25 @@ describe('Given that we have received the next user from Redis', function(){
           sinon.stub(gplus.activities, 'list', function(params, callback) {
             callback(null, activityFeedMulti);
           });
-        }
+        });
 
-        var after = function(){
-          redis.hgetall.restore();
-        }
+        afterEach(function(){
+          redis.hgetall.restore()
+          gplus.activities.list.restore()
+        })
 
         it.skip('should paste the post to the G+ group', function(){
 
         })
-        it.skip('should add the new post into the redis hash', function(){
-          before()
+        it('should add the new post into the redis hash', function(){
           const processing = new Processing(redis, gplus);
           processing.getDetails(returnedUser);
 
-          sinon.assert.notCalled(redis.hmset)
-          after()
+          sinon.assert.calledWith(redis.hmset,
+            activityFeedMulti.items[1].id,
+            'replies', activityFeedMulti.items[1].object.replies.totalItems,
+            'postDate', activityFeedMulti.items[1].updated
+          )
         })
       })
     })
