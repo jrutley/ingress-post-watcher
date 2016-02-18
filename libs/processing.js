@@ -21,11 +21,13 @@ function Processing (redis, gplus) {
       })
 
       redis.lrange(returnedUser, 0, -1, function(err, postIds){
-        var missingPosts;
+        var missingPosts, existingPosts
         if(postIds === undefined) {
           missingPosts = gPlusPosts
+          existingPosts = []
         } else {
           missingPosts = gPlusPosts.filter(gpp=> !postIds.includes(gpp.postId))
+          existingPosts = gPlusPosts.filter(gpp=> postIds.includes(gpp.postId))
         }
 
         missingPosts.forEach(gpp=>{
@@ -37,18 +39,21 @@ function Processing (redis, gplus) {
             "postDate", gpp.postDate
           )
         })
+
+        existingPosts.forEach(gpp=>{
+          redis.hgetall(gpp.postId, (err, storedPosts) =>{
+            console.log("existingPosts")
+            console.log(storedPosts)
+            if(gpp.replies > storedPosts.replies) {
+              redis.hmset(
+                gpp.postId,
+                "replies", activity.items[0].object.replies.totalItems,
+                "postDate", activity.items[0].updated
+              )
+            }
+          })
+        })
       })
-      // redis.hgetall(returnedUser, (err, storedPosts) =>{
-      //   if(storedPosts === null || storedPosts) {
-      //     redis.hmset(
-      //       returnedUser,
-      //       // commentid, # of replies, post update date?
-      //       "postId", activity.items[0].id,
-      //       "replies", activity.items[0].object.replies.totalItems,
-      //       "postDate", activity.items[0].updated
-      //     )
-      //   }
-      // })
     });
   }
 }
