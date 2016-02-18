@@ -1,0 +1,525 @@
+{
+ "kind": "plus#activityFeed",
+ "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/-ZQteVBcDimqYB954Hv7_NcGkpI\"",
+ "title": "Google+ List of Activities for Collection PUBLIC",
+ "updated": "2015-12-11T19:45:31.331Z",
+ "items": [
+  {
+   "kind": "plus#activity",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/3GC4S3wIYUJAHbO1WBNVMtN-O9s\"",
+   "title": "T-15",
+   "published": "2015-12-11T19:45:31.331Z",
+   "updated": "2015-12-11T19:45:31.331Z",
+   "id": "z12yhxrrcpnuivqeb22sxfwpomzmihzls",
+   "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/CzbmSw8F7N3",
+   "actor": {
+    "id": "114076692022231059864",
+    "displayName": "A Detection Algorithm (ADA)",
+    "url": "https://plus.google.com/114076692022231059864",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-keYZsrxeARU/AAAAAAAAAAI/AAAAAAAAAFM/fy4YA6j4UCo/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "verb": "post",
+   "object": {
+    "objectType": "note",
+    "actor": {
+     "verification": {
+      "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+     }
+    },
+    "content": "T-15\ufeff",
+    "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/CzbmSw8F7N3",
+    "replies": {
+     "totalItems": 69,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12yhxrrcpnuivqeb22sxfwpomzmihzls/comments"
+    },
+    "plusoners": {
+     "totalItems": 155,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12yhxrrcpnuivqeb22sxfwpomzmihzls/people/plusoners"
+    },
+    "resharers": {
+     "totalItems": 30,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12yhxrrcpnuivqeb22sxfwpomzmihzls/people/resharers"
+    },
+    "attachments": [
+     {
+      "objectType": "photo",
+      "displayName": "T-15",
+      "id": "114076692022231059864.6227114657713004402",
+      "content": "nnfavjpd2^4.png",
+      "url": "https://plus.google.com/photos/114076692022231059864/albums/6227114654970949169/6227114657713004402",
+      "image": {
+       "url": "https://lh3.googleusercontent.com/-aZoX9AeuWjM/Vmsnydycn3I/AAAAAAAAAPM/rjKh94ClfzA/w506-h750/nnfavjpd2%255E4.png",
+       "type": "image/jpeg"
+      },
+      "fullImage": {
+       "url": "https://lh3.googleusercontent.com/-aZoX9AeuWjM/Vmsnydycn3I/AAAAAAAAAPM/rjKh94ClfzA/w928-h572/nnfavjpd2%255E4.png",
+       "type": "image/jpeg",
+       "height": 572,
+       "width": 928
+      }
+     }
+    ]
+   },
+   "provider": {
+    "title": "Google+"
+   },
+   "access": {
+    "kind": "plus#acl",
+    "description": "Public",
+    "items": [
+     {
+      "type": "public"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "plus#activity",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/lPXXOuovUCJwxJJPmZnJsiuXZdo\"",
+   "title": "Are you paying attention?\n\nT-30",
+   "published": "2015-11-13T16:30:15.194Z",
+   "updated": "2015-11-13T16:30:15.194Z",
+   "id": "z130w51bmkm1sn1vq22sxfwpomzmihzls",
+   "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/LkHTLweL7xk",
+   "actor": {
+    "id": "114076692022231059864",
+    "displayName": "A Detection Algorithm (ADA)",
+    "url": "https://plus.google.com/114076692022231059864",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-keYZsrxeARU/AAAAAAAAAAI/AAAAAAAAAFM/fy4YA6j4UCo/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "verb": "post",
+   "object": {
+    "objectType": "note",
+    "actor": {
+     "verification": {
+      "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+     }
+    },
+    "content": "Are you paying attention?<br /><br />T-30\ufeff",
+    "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/LkHTLweL7xk",
+    "replies": {
+     "totalItems": 120,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z130w51bmkm1sn1vq22sxfwpomzmihzls/comments"
+    },
+    "plusoners": {
+     "totalItems": 145,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z130w51bmkm1sn1vq22sxfwpomzmihzls/people/plusoners"
+    },
+    "resharers": {
+     "totalItems": 29,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z130w51bmkm1sn1vq22sxfwpomzmihzls/people/resharers"
+    },
+    "attachments": [
+     {
+      "objectType": "photo",
+      "displayName": "ummnaiys897nztmfh6",
+      "id": "114076692022231059864.6216672404104826050",
+      "content": "nhdspzelabvessvifecna.jpg",
+      "url": "https://plus.google.com/photos/114076692022231059864/albums/6216672406344418113/6216672404104826050",
+      "image": {
+       "url": "https://lh3.googleusercontent.com/-gbuaprl7AAk/VkYOnTukTMI/AAAAAAAAANM/0UxdKCwr-GQ/w506-h750/nhdspzelabvessvifecna.jpg",
+       "type": "image/jpeg"
+      },
+      "fullImage": {
+       "url": "https://lh3.googleusercontent.com/-gbuaprl7AAk/VkYOnTukTMI/AAAAAAAAANM/0UxdKCwr-GQ/w1200-h452/nhdspzelabvessvifecna.jpg",
+       "type": "image/jpeg",
+       "height": 452,
+       "width": 1200
+      }
+     }
+    ]
+   },
+   "provider": {
+    "title": "Google+"
+   },
+   "access": {
+    "kind": "plus#acl",
+    "description": "Public",
+    "items": [
+     {
+      "type": "public"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "plus#activity",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/UC5HuS348-FRnAW5FTzOmGxmDT0\"",
+   "title": "It is time for something new.",
+   "published": "2015-11-02T05:29:41.227Z",
+   "updated": "2015-11-02T05:29:41.227Z",
+   "id": "z13twtcppwa5f3cdu22sxfwpomzmihzls",
+   "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/AkCmHuYcvAE",
+   "actor": {
+    "id": "114076692022231059864",
+    "displayName": "A Detection Algorithm (ADA)",
+    "url": "https://plus.google.com/114076692022231059864",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-keYZsrxeARU/AAAAAAAAAAI/AAAAAAAAAFM/fy4YA6j4UCo/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "verb": "post",
+   "object": {
+    "objectType": "note",
+    "actor": {
+     "verification": {
+      "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+     }
+    },
+    "content": "It is time for something new.\ufeff",
+    "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/AkCmHuYcvAE",
+    "replies": {
+     "totalItems": 101,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z13twtcppwa5f3cdu22sxfwpomzmihzls/comments"
+    },
+    "plusoners": {
+     "totalItems": 139,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z13twtcppwa5f3cdu22sxfwpomzmihzls/people/plusoners"
+    },
+    "resharers": {
+     "totalItems": 71,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z13twtcppwa5f3cdu22sxfwpomzmihzls/people/resharers"
+    },
+    "attachments": [
+     {
+      "objectType": "article",
+      "displayName": "Artificial intelligence: Humankind’s best chance for a healthier future",
+      "content": "Artificial intelligence inspires fear in some, but it may be the only way we can meet our potential in healthcare.",
+      "url": "http://www.cio.com/article/2997174/big-data/artificial-intelligence-humankinds-best-chance-for-a-healthier-future.html",
+      "image": {
+       "url": "https://lh3.googleusercontent.com/proxy/jPGkFZWOQC2EAjKD7yABO5TK7FKeHA0Jj9bLpK9uiowMgZ7kzA8Q4Uw3EwQq9DNxqOJAmri69tuCONKVwDXk8k9VPotmLyo-CR1NIMInyW_ZUMdGpQgFtYyc3qH4EGHKOeKFKK5PApDOuebN-lTbF9qjTqz5WR0=w506-h910",
+       "type": "image/jpeg",
+       "height": 910,
+       "width": 506
+      },
+      "fullImage": {
+       "url": "http://images.techhive.com/images/article/2015/10/human-skeleton-163715_1280-100623775-primary.idge.jpg",
+       "type": "image/jpeg"
+      }
+     }
+    ]
+   },
+   "provider": {
+    "title": "Google+"
+   },
+   "access": {
+    "kind": "plus#acl",
+    "description": "Public",
+    "items": [
+     {
+      "type": "public"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "plus#activity",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/iENkIiyCoWwURpTBkQ-N0MQbAYE\"",
+   "title": "An eye in the sky is worth many on the ground.\n\nusxpknsa2?7",
+   "published": "2015-05-30T00:58:17.448Z",
+   "updated": "2015-05-30T00:58:17.448Z",
+   "id": "z13ywziixqnyhvbvf22sxfwpomzmihzls",
+   "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/JwSUTqruQMA",
+   "actor": {
+    "id": "114076692022231059864",
+    "displayName": "A Detection Algorithm (ADA)",
+    "url": "https://plus.google.com/114076692022231059864",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-keYZsrxeARU/AAAAAAAAAAI/AAAAAAAAAFM/fy4YA6j4UCo/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "verb": "post",
+   "object": {
+    "objectType": "note",
+    "actor": {
+     "verification": {
+      "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+     }
+    },
+    "content": "An eye in the sky is worth many on the ground.<br /><br />usxpknsa2?7\ufeff",
+    "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/JwSUTqruQMA",
+    "replies": {
+     "totalItems": 38,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z13ywziixqnyhvbvf22sxfwpomzmihzls/comments"
+    },
+    "plusoners": {
+     "totalItems": 104,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z13ywziixqnyhvbvf22sxfwpomzmihzls/people/plusoners"
+    },
+    "resharers": {
+     "totalItems": 17,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z13ywziixqnyhvbvf22sxfwpomzmihzls/people/resharers"
+    },
+    "attachments": [
+     {
+      "objectType": "photo",
+      "displayName": "An eye in the sky is worth many on the ground.\n\nusxpknsa2?7",
+      "id": "114076692022231059864.6154461890194649154",
+      "content": "hsw-shq6ydauq5is.png",
+      "url": "https://plus.google.com/photos/114076692022231059864/albums/6154461888741211009/6154461890194649154",
+      "image": {
+       "url": "https://lh3.googleusercontent.com/-2Dv0iN7QHEo/VWkKezy7MEI/AAAAAAAAALk/I4NY6Kt7CNQ/w506-h750/hsw-shq6ydauq5is.png",
+       "type": "image/jpeg"
+      },
+      "fullImage": {
+       "url": "https://lh3.googleusercontent.com/-2Dv0iN7QHEo/VWkKezy7MEI/AAAAAAAAALk/I4NY6Kt7CNQ/w1016-h508/hsw-shq6ydauq5is.png",
+       "type": "image/jpeg",
+       "height": 508,
+       "width": 1016
+      }
+     }
+    ]
+   },
+   "provider": {
+    "title": "Google+"
+   },
+   "access": {
+    "kind": "plus#acl",
+    "description": "Public",
+    "items": [
+     {
+      "type": "public"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "plus#activity",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/qo92xtc3MpoxZAjoXzc83vFDhbE\"",
+   "title": "Keep your eyes on the prize...",
+   "published": "2015-03-26T03:54:40.887Z",
+   "updated": "2015-03-26T03:54:40.887Z",
+   "id": "z12mtfryozjfyhaxn04cf3pjmqmfydtryb0",
+   "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/WydcysKpDSL",
+   "actor": {
+    "id": "114076692022231059864",
+    "displayName": "A Detection Algorithm (ADA)",
+    "url": "https://plus.google.com/114076692022231059864",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-keYZsrxeARU/AAAAAAAAAAI/AAAAAAAAAFM/fy4YA6j4UCo/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "verb": "post",
+   "object": {
+    "objectType": "note",
+    "actor": {
+     "verification": {
+      "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+     }
+    },
+    "content": "Keep your eyes on the prize...\ufeff",
+    "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/WydcysKpDSL",
+    "replies": {
+     "totalItems": 52,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12mtfryozjfyhaxn04cf3pjmqmfydtryb0/comments"
+    },
+    "plusoners": {
+     "totalItems": 109,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12mtfryozjfyhaxn04cf3pjmqmfydtryb0/people/plusoners"
+    },
+    "resharers": {
+     "totalItems": 16,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12mtfryozjfyhaxn04cf3pjmqmfydtryb0/people/resharers"
+    },
+    "attachments": [
+     {
+      "objectType": "photo",
+      "displayName": "Keep your eyes on the prize...",
+      "id": "114076692022231059864.6130387533127217970",
+      "content": "Eyes.png",
+      "url": "https://plus.google.com/photos/114076692022231059864/albums/6130387530862709649/6130387533127217970",
+      "image": {
+       "url": "https://lh3.googleusercontent.com/-XgBSjBcVZ7M/VROC-y-H8zI/AAAAAAAAAJw/U-29HBeB71Q/w506-h750/Eyes.png",
+       "type": "image/jpeg"
+      },
+      "fullImage": {
+       "url": "https://lh3.googleusercontent.com/-XgBSjBcVZ7M/VROC-y-H8zI/AAAAAAAAAJw/U-29HBeB71Q/w896-h504/Eyes.png",
+       "type": "image/jpeg",
+       "height": 504,
+       "width": 896
+      }
+     }
+    ]
+   },
+   "provider": {
+    "title": "Google+"
+   },
+   "access": {
+    "kind": "plus#acl",
+    "description": "Public",
+    "items": [
+     {
+      "type": "public"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "plus#activity",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/9u5mp8egtjO8Q7mgFKRCJjPthfQ\"",
+   "title": "The stakes are high... Are you paying attention?\n\n#Shonin",
+   "published": "2015-03-26T00:58:57.111Z",
+   "updated": "2015-03-26T00:58:57.111Z",
+   "id": "z12gufnzrp25yhhz304cf3pjmqmfydtryb0",
+   "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/f3QyNB8DMur",
+   "actor": {
+    "id": "114076692022231059864",
+    "displayName": "A Detection Algorithm (ADA)",
+    "url": "https://plus.google.com/114076692022231059864",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-keYZsrxeARU/AAAAAAAAAAI/AAAAAAAAAFM/fy4YA6j4UCo/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "verb": "post",
+   "object": {
+    "objectType": "note",
+    "actor": {
+     "verification": {
+      "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+     }
+    },
+    "content": "The stakes are high... Are you paying attention?<br /><br /><a rel=\"nofollow\" class=\"ot-hashtag\" href=\"https://plus.google.com/s/%23Shonin\">#Shonin</a>\ufeff",
+    "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/f3QyNB8DMur",
+    "replies": {
+     "totalItems": 45,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12gufnzrp25yhhz304cf3pjmqmfydtryb0/comments"
+    },
+    "plusoners": {
+     "totalItems": 95,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12gufnzrp25yhhz304cf3pjmqmfydtryb0/people/plusoners"
+    },
+    "resharers": {
+     "totalItems": 19,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12gufnzrp25yhhz304cf3pjmqmfydtryb0/people/resharers"
+    },
+    "attachments": [
+     {
+      "objectType": "photo",
+      "displayName": "lzmpyymc8wrhgzmxv5",
+      "id": "114076692022231059864.6130342181243584050",
+      "content": "Attention.jpg",
+      "url": "https://plus.google.com/photos/114076692022231059864/albums/6130342174052115665/6130342181243584050",
+      "image": {
+       "url": "https://lh3.googleusercontent.com/-dfHaH5H2IiY/VRNZu-Cd_jI/AAAAAAAAAIg/Vu6iRrQdalA/w506-h750/Attention.jpg",
+       "type": "image/jpeg"
+      },
+      "fullImage": {
+       "url": "https://lh3.googleusercontent.com/-dfHaH5H2IiY/VRNZu-Cd_jI/AAAAAAAAAIg/Vu6iRrQdalA/w500-h500/Attention.jpg",
+       "type": "image/jpeg",
+       "height": 500,
+       "width": 500
+      }
+     }
+    ]
+   },
+   "provider": {
+    "title": "Google+"
+   },
+   "access": {
+    "kind": "plus#acl",
+    "description": "Public",
+    "items": [
+     {
+      "type": "public"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "plus#activity",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/FP5ovVhQROlUInnP1R_jewHM68I\"",
+   "title": "An eye in the sky is worth two on the ground.\n\nWatch closely. Everywhere.",
+   "published": "2015-02-20T22:01:14.816Z",
+   "updated": "2015-02-20T22:01:14.816Z",
+   "id": "z12yv3x4lxrewlkpx04cf3pjmqmfydtryb0",
+   "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/Yhakp3SutBW",
+   "actor": {
+    "id": "114076692022231059864",
+    "displayName": "A Detection Algorithm (ADA)",
+    "url": "https://plus.google.com/114076692022231059864",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-keYZsrxeARU/AAAAAAAAAAI/AAAAAAAAAFM/fy4YA6j4UCo/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "verb": "post",
+   "object": {
+    "objectType": "note",
+    "actor": {
+     "verification": {
+      "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+     }
+    },
+    "content": "An eye in the sky is worth two on the ground.<br /><br />Watch closely. Everywhere.\ufeff",
+    "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/Yhakp3SutBW",
+    "replies": {
+     "totalItems": 48,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12yv3x4lxrewlkpx04cf3pjmqmfydtryb0/comments"
+    },
+    "plusoners": {
+     "totalItems": 157,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12yv3x4lxrewlkpx04cf3pjmqmfydtryb0/people/plusoners"
+    },
+    "resharers": {
+     "totalItems": 18,
+     "selfLink": "https://content.googleapis.com/plus/v1/activities/z12yv3x4lxrewlkpx04cf3pjmqmfydtryb0/people/resharers"
+    },
+    "attachments": [
+     {
+      "objectType": "photo",
+      "displayName": "An eye in the sky is worth two on the ground.\n\nWatch closely. Everywhere.",
+      "id": "114076692022231059864.6118050494535247346",
+      "content": "SkyEyes.png",
+      "url": "https://plus.google.com/photos/114076692022231059864/albums/6118050490827552785/6118050494535247346",
+      "image": {
+       "url": "https://lh3.googleusercontent.com/-axVI595Nf34/VOeugoytJfI/AAAAAAAAAGM/rSsy0G1WseA/w506-h750/SkyEyes.png",
+       "type": "image/jpeg"
+      },
+      "fullImage": {
+       "url": "https://lh3.googleusercontent.com/-axVI595Nf34/VOeugoytJfI/AAAAAAAAAGM/rSsy0G1WseA/w833-h468/SkyEyes.png",
+       "type": "image/jpeg",
+       "height": 468,
+       "width": 833
+      }
+     }
+    ]
+   },
+   "provider": {
+    "title": "Google+"
+   },
+   "access": {
+    "kind": "plus#acl",
+    "description": "Public",
+    "items": [
+     {
+      "type": "public"
+     }
+    ]
+   }
+  }
+ ]
+}

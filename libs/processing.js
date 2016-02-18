@@ -17,9 +17,9 @@ function Processing (redis, gplus) {
           redis.hmset(
             returnedUser,
             // commentid, # of replies, post update date?
-            "postId", res.id,
-            "replies", res.object.replies.totalItems,
-            "postDate", res.updated
+            "postId", res.items[0].id,
+            "replies", res.items[0].object.replies.totalItems,
+            "postDate", res.items[0].updated
           )
         }
       })
