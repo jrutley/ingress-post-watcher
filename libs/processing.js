@@ -42,8 +42,6 @@ function Processing (redis, gplus) {
 
         existingPosts.forEach(gpp=>{
           redis.hgetall(gpp.postId, (err, storedPosts) =>{
-            console.log("existingPosts")
-            console.log(storedPosts)
             if(gpp.replies > storedPosts.replies) {
               redis.hmset(
                 gpp.postId,

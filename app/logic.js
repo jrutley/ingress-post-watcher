@@ -13,6 +13,11 @@ var moment = require('moment');
 //      post ADA's comment to Slack
 
 const countMap = new Map();
+console.log(envVars.API_KEYS)
+if(envVars.API_KEYS === undefined){
+  console.log("You must set the API_KEYS variable to an array of keys in env.conf.json")
+  process.exit(1)
+}
 envVars.API_KEYS.forEach(key=>{
   countMap.set(key, {successCount: 0, failCount: 0});
 });
