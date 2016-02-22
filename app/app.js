@@ -1,13 +1,15 @@
 const Rx = require('rx');
-const redis = require('../libs/redis-access.js');
+const Redis = require('../libs/redis-access.js');
 const app = require('./logic.js');
 const envVars = require('../env.conf.json');
 
 var source = Rx.Observable
 .interval(250 /* ms */)
-.timeInterval();
+.timeInterval()
+.take(3)
 
 const apiKeys = envVars.API_KEYS;
+const redis = new Redis()
 var connection = null;
 var subscription = source.subscribe(
   next => {
@@ -23,8 +25,8 @@ var subscription = source.subscribe(
       Rx.Observable.fromEvent(connection, "end").subscribe(e=>{console.log("APP redis end")});
       Rx.Observable.fromEvent(connection, "drain").subscribe(d=>{console.log("APP redis drain")});
     }
-    redis.retrieve(connection, "users", (value)=>{
-      app(apiKeys[next.value % apiKeys.length], value);
+    redis.rpoplpush(connection, "users", "users", (value)=>{
+      app(apiKeys[next.value % apiKeys.length], value, connection);
     });
   },
   err => {
@@ -34,6 +36,9 @@ var subscription = source.subscribe(
   },
   () => {
     console.log('APP RX Completed');
-    redis.close(connection);
+    Rx.Observable.fromEvent(connection, "idle").bufferWithTime(5000).subscribe(i=>{
+      console.log("APP redis idle")
+      redis.close(connection);
+    });
   }
 );

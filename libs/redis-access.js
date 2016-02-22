@@ -1,52 +1,71 @@
 const envVars = require('../env.conf.json');
 const redis = require('redis');
 
-var connection = null;
+function Redis(){
+  const self = this;
+  // hide "new"
+  if (!(this instanceof Redis)) return new Redis();
 
-function open(server, port, pass) {
-  const args = {
-    port: port || envVars.REDIS_PORT,
-    host: server || envVars.REDIS_SERVER
-  };
-  connection = redis.createClient(args);
+  var connection = null;
 
-  console.log("REDIS: open on " + args.host + ":"+ args.port);
+  self.open = function(server, port, pass) {
+    const args = {
+      port: port || envVars.REDIS_PORT,
+      host: server || envVars.REDIS_SERVER
+    };
+    connection = redis.createClient(args);
 
-  connection.auth(pass || envVars.REDIS_PASS);
-  return connection;
-}
+    console.log("REDIS: open on " + args.host + ":"+ args.port);
 
-function close(connection) {
-  if(connection !== null) {
-    connection.quit();
-    console.log("REDIS: Successful close");
-  } else {
-    console.log("REDIS: close: connection was null");
+    connection.auth(pass || envVars.REDIS_PASS);
+    return connection;
+  }
+
+  self.close = function(connection) {
+    if(connection !== null) {
+      connection.quit();
+      console.log("REDIS: Successful close");
+    } else {
+      console.log("REDIS: close: connection was null");
+    }
+  }
+
+  self.rpoplpush = function(connection, sourceKey, destinationKey, callback) {
+    try {
+      connection.send_command("rpoplpush", [sourceKey, destinationKey], (err, res) => {
+        if(err !== null){
+          console.log("REDIS: rpoplpush error: " + err);
+        } else {
+          // console.log(res);
+          callback(res);
+        }
+      });
+    } catch (e){
+      console.log("REDIS: Caught " + e);
+    }
+  }
+
+  self.hgetall = function(key, response){
+    connection.hgetall(key, response)
+  }
+  self.lrange = function(key, min, max, response){
+    connection.lrange(key, min, max, response)
+  }
+  self.lpush = function(key, value, response){
+    connection.lpush(key, value, response)
+  }
+  self.hmset = function(key, args){
+    connection.hmset(key, args)
   }
 }
 
-function rpoplpush(connection, sourceKey, destinationKey, callback) {
-  try {
-    connection.send_command("rpoplpush", [sourceKey, destinationKey], (err, res) => {
-      if(err !== null){
-        console.log("REDIS: rpoplpush error: " + err);
-      } else {
-        // console.log(res);
-        callback(res);
-      }
-    });
-  } catch (e){
-    console.log("REDIS: Caught " + e);
-  }
-}
-
-function retrieve(connection, collection, callback){
-  rpoplpush(connection, collection, collection, callback);
-}
-
-
-module.exports = {
-  open: open,
-  close: close,
-  retrieve: retrieve
-}
+module.exports = Redis
+// {
+//   open: open,
+//   close: close,
+//   retrieve: retrieve,
+//     hgetall: connection.hgetall,
+//     lrange: connection.lrange,
+//     lpush: connection.lpush,
+//     hmset: connection.hmset
+// }

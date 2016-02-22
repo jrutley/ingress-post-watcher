@@ -3,6 +3,8 @@ var fs = require('fs');
 var plus = google.plus('v1');
 const envVars = require('../env.conf.json');
 var moment = require('moment');
+var Processing = require('../libs/processing.js')
+var Redis = require('../libs/redis-access.js')
 
 // Poll for new posts made by anyone in the list of "approved" people
 //  plus#activityFeed supplies an "updated" parameter
@@ -13,7 +15,6 @@ var moment = require('moment');
 //      post ADA's comment to Slack
 
 const countMap = new Map();
-console.log(envVars.API_KEYS)
 if(envVars.API_KEYS === undefined){
   console.log("You must set the API_KEYS variable to an array of keys in env.conf.json")
   process.exit(1)
@@ -23,11 +24,12 @@ envVars.API_KEYS.forEach(key=>{
 });
 const fileDescriptor = fs.openSync("logs/output.txt", 'w');
 
-function App(apiKey, user) {
+function App(apiKey, user, redis) {
   const userId = JSON.parse(user);
-
   console.log("\"Parsing\" user... " + user);
-  return; // Don't exercise the Google API right now
+  var processing = Processing(redis, plus)
+  processing.getDetails(userId.id, apiKey)
+return;
 
   var request = plus.activities.list({
     auth: apiKey,

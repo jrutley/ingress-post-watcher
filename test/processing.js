@@ -4,6 +4,8 @@ var Processing = require("../libs/processing.js");
 var assert = require("assert");
 var activityFeedMulti = require("./activityFeed-multi.json");
 var activityFeedSingle = require("./activityFeed-single.json");
+var Redis = require("../libs/redis-access.js")
+var redisLib = require("redis")
 chai.should();
 
 // Poll for new posts made by anyone in the list of "approved" people
@@ -20,14 +22,17 @@ chai.should();
 
 describe('Given that we have received the next user from Redis', function(){
   // We have made a call to Redis, and it returned our user
-  const returnedUser = "+ADetectionAlgorithmADA";
-
-  var redis = {
+  const returnedUser = "+ADetectionAlgorithmADA"; // the .id of what's stored in the users list
+  var redis = new Redis()
+  var connection = {
     hgetall: function(key, response){},
     lrange: function(key, min, max, response){},
     lpush: function(key, value, response){},
-    hmset: function(key, args){}
+    hmset: function(key, args){},
+    auth: function(pass){}
   }
+  sinon.stub(redisLib, "createClient").returns(connection);
+  redis.open("server", "port", "password")
 
   var gplus = {
     activities: {
@@ -39,130 +44,131 @@ describe('Given that we have received the next user from Redis', function(){
     try{
       sinon.spy(gplus.activities, 'list');
 
+      const apiKey = 'myApiKey'
       const processing = new Processing(redis, gplus);
-      processing.getDetails(returnedUser);
+      processing.getDetails(returnedUser, apiKey);
       assert(gplus.activities.list.calledWith({
-        'userId' : returnedUser,
-        'collection' : 'public'
+        auth: apiKey,
+        userId : returnedUser,
+        collection : 'public'
       }));
     } finally {
       gplus.activities.list.restore()
     }
-    }
-  )
+  })
 
-    describe('When an individual record was not found in the keystore', ()=> {
+  describe('When an individual record was not found in the keystore', ()=> {
 
+    beforeEach(function() {
+      redis.hmset = sinon.spy()
+      redis.lpush = sinon.spy()
+      sinon.stub(redis, 'lrange', function(key, min, max, replies){
+        replies(null, undefined)
+      })
+      sinon.stub(gplus.activities, 'list', function(params, callback) {
+        callback(null, activityFeedSingle);
+      })
+    })
+
+    afterEach(function() {
+      gplus.activities.list.restore()
+      redis.lrange.restore()
+    });
+
+    it('should insert a new redis hash with the results from the g+ comment list', function(){
+
+      const processing = new Processing(redis, gplus);
+
+      processing.getDetails(returnedUser);
+
+      // Should do two items here
+      sinon.assert.calledWith(redis.lpush,
+        returnedUser, activityFeedSingle.items[0].id
+      );
+      sinon.assert.calledWith(redis.hmset,
+        activityFeedSingle.items[0].id,
+        'replies', activityFeedSingle.items[0].object.replies.totalItems,
+        'postDate', activityFeedSingle.items[0].updated
+      );
+    });
+
+    it.skip('should post to the G+ hangout that the bot is starting up', function(){
+
+    })
+
+
+  });
+  describe('When a record was found in the keystore', function() {
+
+    beforeEach(function() {
+      redis.hmset = sinon.spy();
+    });
+
+    afterEach(function() {
+    });
+
+    describe('and there are no new replies', function(){
+      // this means "we compared the redis k/v with the activity list, and there's no changes"
+      // aka the gplus.list call is the same as the k/v store
       beforeEach(function() {
-        redis.hmset = sinon.spy()
-        redis.lpush = sinon.spy()
-        sinon.stub(redis, 'lrange', function(key, min, max, replies){
-          replies(null, undefined)
+        sinon.stub(redis, 'hgetall', function(key, replies){
+          replies(null, {
+            replies: 69,
+            postDate: '2015-12-11T19:45:31.331Z'
+          })
         })
+
         sinon.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedSingle);
-        })
+        });
+      })
+      afterEach(function(){
+        redis.hgetall.restore();
+        gplus.activities.list.restore();
       })
 
-      afterEach(function() {
-        gplus.activities.list.restore()
-        redis.lrange.restore()
-      });
-
-      it('should insert a new redis hash with the results from the g+ comment list', function(){
-
+      it('will not update redis with any values', function(){
         const processing = new Processing(redis, gplus);
-
         processing.getDetails(returnedUser);
 
-        // Should do two items here
-        sinon.assert.calledWith(redis.lpush,
-          returnedUser, activityFeedSingle.items[0].id
-        );
-        sinon.assert.calledWith(redis.hmset,
-          activityFeedSingle.items[0].id,
-          'replies', activityFeedSingle.items[0].object.replies.totalItems,
-          'postDate', activityFeedSingle.items[0].updated
-        );
-      });
-
-      it.skip('should post to the G+ hangout that the bot is starting up', function(){
-
+        sinon.assert.notCalled(redis.hmset);
       })
+    })
 
-
-    });
-    describe('When a record was found in the keystore', function() {
-
+    describe('and the reply count was updated on a post', function(){
+      var singlePost = 'z12yhxrrcpnuivqeb22sxfwpomzmihzls'
       beforeEach(function() {
-        redis.hmset = sinon.spy();
-      });
+        sinon.stub(redis, 'hgetall', function(key, response){
+          var data =
+          {
+            replies: 65,
+            postDate: '2015-12-11T19:45:31.331Z'
+          };
+          response(null, data);
+        }).calledWith(singlePost);
 
-      afterEach(function() {
-      });
+        sinon.stub(redis, 'lrange', function(key, min, max, response){
+          response(null, activityFeedMulti.items[0].id)
+        }).withArgs(returnedUser, 0, 1)
 
-      describe('and there are no new replies', function(){
-        // this means "we compared the redis k/v with the activity list, and there's no changes"
-        // aka the gplus.list call is the same as the k/v store
-        beforeEach(function() {
-          sinon.stub(redis, 'hgetall', function(key, replies){
-            replies(null, {
-              replies: 69,
-              postDate: '2015-12-11T19:45:31.331Z'
-            })
-          })
-
-          sinon.stub(gplus.activities, 'list', function(params, callback) {
-            callback(null, activityFeedSingle);
-          });
-        })
-        afterEach(function(){
-          redis.hgetall.restore();
-          gplus.activities.list.restore();
-        })
-
-        it('will not update redis with any values', function(){
-          const processing = new Processing(redis, gplus);
-          processing.getDetails(returnedUser);
-
-          sinon.assert.notCalled(redis.hmset);
-        })
+        sinon.stub(gplus.activities, 'list', function(params, callback) {
+          callback(null, activityFeedSingle);
+        });
       })
 
-      describe('and the reply count was updated on a post', function(){
-        var singlePost = 'z12yhxrrcpnuivqeb22sxfwpomzmihzls'
-        beforeEach(function() {
-          sinon.stub(redis, 'hgetall', function(key, response){
-            var data =
-            {
-              replies: 65,
-              postDate: '2015-12-11T19:45:31.331Z'
-            };
-            response(null, data);
-          }).calledWith(singlePost);
+      afterEach(function(){
+        redis.hgetall.restore()
+        redis.lrange.restore()
+        gplus.activities.list.restore()
+      })
 
-          sinon.stub(redis, 'lrange', function(key, min, max, response){
-            response(null, activityFeedMulti.items[0].id)
-          }).withArgs(returnedUser, 0, 1)
+      it('will update the k/v hash with the updated post count', function(){
+        const processing = new Processing(redis, gplus);
+        processing.getDetails(returnedUser);
 
-          sinon.stub(gplus.activities, 'list', function(params, callback) {
-            callback(null, activityFeedSingle);
-          });
-        })
-
-        afterEach(function(){
-          redis.hgetall.restore()
-          redis.lrange.restore()
-          gplus.activities.list.restore()
-        })
-
-        it('will update the k/v hash with the updated value', function(){
-          const processing = new Processing(redis, gplus);
-          processing.getDetails(returnedUser);
-
-          sinon.assert.calledWith(redis.hmset, singlePost,
-            "replies", activityFeedSingle.items[0].object.replies.totalItems,
-            "postDate", activityFeedSingle.items[0].updated)
+        sinon.assert.calledWith(redis.hmset, singlePost,
+          "replies", activityFeedSingle.items[0].object.replies.totalItems,
+          "postDate", activityFeedSingle.items[0].updated)
         })
 
         describe.skip('and the poster is ADA', function(){

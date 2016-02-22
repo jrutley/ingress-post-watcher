@@ -3,15 +3,19 @@ module.exports = Processing
 function Processing (redis, gplus) {
   const self = this;
   // hide "new"
-  if (!(this instanceof Processing)) return new Processing(opt);
+  if (!(this instanceof Processing)) return new Processing(redis, gplus);
 
   self.gplus = gplus
-
+  self.redis = redis
 
   // returnedUser is a G+ user
-  self.getDetails = (returnedUser) => {
+  self.getDetails = (returnedUser, apiKey) => {
 
-    gplus.activities.list({'userId': returnedUser, 'collection': 'public'}, function(err,activity){
+    self.gplus.activities.list({auth: apiKey, userId: returnedUser, collection: 'public'}, function(err,activity){
+      if(err !== null){
+        console.log(err)
+        return
+      }
       var gPlusPosts = activity.items.map(i=>{
         return {
           postId: i.id,
@@ -20,9 +24,11 @@ function Processing (redis, gplus) {
         }
       })
 
-      redis.lrange(returnedUser, 0, -1, function(err, postIds){
+      self.redis.lrange(returnedUser, 0, -1, function(err, postIds){
         var missingPosts, existingPosts
-        if(postIds === undefined) {
+        console.log("PostIds")
+        console.log(postIds)
+        if(postIds === undefined || postIds) {
           missingPosts = gPlusPosts
           existingPosts = []
         } else {
