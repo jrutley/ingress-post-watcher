@@ -8,6 +8,7 @@ var Redis = require("../libs/redis-access.js")
 var redisLib = require("redis")
 var google = require('googleapis')
 var gplus = google.plus('v1')
+var request = require('request')
 
 chai.should();
 
@@ -25,7 +26,8 @@ chai.should();
 
 describe('Given that we have received the next user from Redis', function(){
   // We have made a call to Redis, and it returned our user
-  const returnedUser = "+ADetectionAlgorithmADA"; // the .id of what's stored in the users list
+  //const returnedUser = "+ADetectionAlgorithmADA"; // the .id of what's stored in the users list
+  const returnedUser = "114076692022231059864" // ADA's ID
   var redis = new Redis()
   var connection = {
     hgetall: function(key, response){},
@@ -36,12 +38,6 @@ describe('Given that we have received the next user from Redis', function(){
   }
   sinon.stub(redisLib, "createClient").returns(connection);
   redis.open("server", "port", "password")
-
-  // var gplus = {
-  //   activities: {
-  //     list: function(params, callback){}
-  //   }
-  // };
 
   it('should retrieve the activity list from Slack', function(){
     try{
@@ -94,7 +90,8 @@ describe('Given that we have received the next user from Redis', function(){
         'postDate', activityFeedSingle.items[0].updated
       );
     });
-  });
+  })
+
   describe('When a record was found in the keystore', function() {
 
     beforeEach(function() {
@@ -135,6 +132,7 @@ describe('Given that we have received the next user from Redis', function(){
     describe('and the reply count was updated on a post', function() {
       var singlePost = 'z12yhxrrcpnuivqeb22sxfwpomzmihzls'
       beforeEach(function() {
+        sinon.stub(request, 'post')
         sinon.stub(redis, 'hgetall', function(key, response){
           var data =
           {
@@ -145,8 +143,8 @@ describe('Given that we have received the next user from Redis', function(){
         }).calledWith(singlePost);
 
         sinon.stub(redis, 'lrange', function(key, min, max, response){
-          response(null, activityFeedSingle.items[0].id)
-        }).withArgs(returnedUser, 0, 1)
+          response(null, [activityFeedSingle.items[0].id])
+        })
 
         sinon.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedSingle);
@@ -157,6 +155,7 @@ describe('Given that we have received the next user from Redis', function(){
         redis.hgetall.restore()
         redis.lrange.restore()
         gplus.activities.list.restore()
+        request.post.restore()
       })
 
       it('will update the k/v hash with the updated post count', function(){
@@ -171,19 +170,21 @@ describe('Given that we have received the next user from Redis', function(){
         describe.skip('and the poster is ADA', function(){
           it.skip('post to Slack with the reply')
         })
+
         describe.skip('and the poster is not ADA', function(){
           it.skip('will not post to Slack')
         })
-    })
+      })
 
       // Use that to iterate through all the values to find any reply updates, or if there are any posts that are not new
       describe('and when there is a new post', function() {
         // We know this because it's not in the k/v list
         beforeEach(function() {
+          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
+          sinon.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
           sinon.stub(redis, 'lrange', function(key, min, max, response){
-            response(null, activityFeedMulti.items[0].id)
-          }).withArgs(returnedUser, 0, 1)
-
+            response(null, [activityFeedSingle.items[0].id])
+          })
           sinon.stub(redis, 'hgetall', function(key, response){
             var data =
             {
@@ -201,14 +202,23 @@ describe('Given that we have received the next user from Redis', function(){
         afterEach(function(){
           redis.hgetall.restore()
           gplus.activities.list.restore()
+          request.post.restore()
+          redis.lrange.restore()
         })
 
-        it.skip('should paste the post to the Slack group', function(){
+        it('should paste the post to the Slack group', function(){
           const processing = new Processing(redis, gplus);
-          processing.getDetails(returnedUser);
-          sinon.assert.calledWith(unirest.send, "")
+          var slackUrl = 'https://my.slack.url.com/services/sample/id'
+
+          var item1 = activityFeedMulti.items[1]
+
+          processing.getDetails(returnedUser, 'apiKey', slackUrl);
+
+          sinon.assert.calledWith(request.post, slackUrl, {
+            json: {text: `@channel: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
+          })
         })
-        
+
         it('should add the new post into the redis hash', function(){
           const processing = new Processing(redis, gplus);
           processing.getDetails(returnedUser);
@@ -221,4 +231,4 @@ describe('Given that we have received the next user from Redis', function(){
         })
       })
     })
-  });
+  })

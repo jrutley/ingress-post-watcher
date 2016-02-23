@@ -4,7 +4,7 @@ const app = require('./logic.js');
 const envVars = require('../env.conf.json');
 
 var source = Rx.Observable
-.interval(250 /* ms */)
+.interval(500 /* ms */)
 .timeInterval()
 //.take(3)
 

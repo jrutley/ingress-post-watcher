@@ -28,7 +28,7 @@ function App(apiKey, user, redis) {
   const userId = JSON.parse(user);
   console.log("\"Parsing\" user... " + user);
   var processing = Processing(redis, plus)
-  processing.getDetails(userId.id, apiKey)
+  processing.getDetails(userId.id, apiKey, envVars.slackUrl)
 return;
 
   var request = plus.activities.list({
