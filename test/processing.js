@@ -6,6 +6,9 @@ var activityFeedMulti = require("./activityFeed-multi.json");
 var activityFeedSingle = require("./activityFeed-single.json");
 var Redis = require("../libs/redis-access.js")
 var redisLib = require("redis")
+var google = require('googleapis')
+var gplus = google.plus('v1')
+
 chai.should();
 
 // Poll for new posts made by anyone in the list of "approved" people
@@ -34,13 +37,13 @@ describe('Given that we have received the next user from Redis', function(){
   sinon.stub(redisLib, "createClient").returns(connection);
   redis.open("server", "port", "password")
 
-  var gplus = {
-    activities: {
-      list: function(params, callback){}
-    }
-  };
+  // var gplus = {
+  //   activities: {
+  //     list: function(params, callback){}
+  //   }
+  // };
 
-  it('should retrieve the activity list from G+', function(){
+  it('should retrieve the activity list from Slack', function(){
     try{
       sinon.spy(gplus.activities, 'list');
 
@@ -75,7 +78,7 @@ describe('Given that we have received the next user from Redis', function(){
       redis.lrange.restore()
     });
 
-    it('should insert a new redis hash with the results from the g+ comment list', function(){
+    it('should insert a new redis hash with the results from the Slack comment list', function(){
 
       const processing = new Processing(redis, gplus);
 
@@ -91,12 +94,6 @@ describe('Given that we have received the next user from Redis', function(){
         'postDate', activityFeedSingle.items[0].updated
       );
     });
-
-    it.skip('should post to the G+ hangout that the bot is starting up', function(){
-
-    })
-
-
   });
   describe('When a record was found in the keystore', function() {
 
@@ -135,7 +132,7 @@ describe('Given that we have received the next user from Redis', function(){
       })
     })
 
-    describe('and the reply count was updated on a post', function(){
+    describe('and the reply count was updated on a post', function() {
       var singlePost = 'z12yhxrrcpnuivqeb22sxfwpomzmihzls'
       beforeEach(function() {
         sinon.stub(redis, 'hgetall', function(key, response){
@@ -148,7 +145,7 @@ describe('Given that we have received the next user from Redis', function(){
         }).calledWith(singlePost);
 
         sinon.stub(redis, 'lrange', function(key, min, max, response){
-          response(null, activityFeedMulti.items[0].id)
+          response(null, activityFeedSingle.items[0].id)
         }).withArgs(returnedUser, 0, 1)
 
         sinon.stub(gplus.activities, 'list', function(params, callback) {
@@ -172,12 +169,12 @@ describe('Given that we have received the next user from Redis', function(){
         })
 
         describe.skip('and the poster is ADA', function(){
-          it.skip('post to the G+ hangout with the reply')
+          it.skip('post to Slack with the reply')
         })
         describe.skip('and the poster is not ADA', function(){
-          it.skip('will not post to the G+ hangout')
+          it.skip('will not post to Slack')
         })
-      })
+    })
 
       // Use that to iterate through all the values to find any reply updates, or if there are any posts that are not new
       describe('and when there is a new post', function() {
@@ -206,9 +203,12 @@ describe('Given that we have received the next user from Redis', function(){
           gplus.activities.list.restore()
         })
 
-        it.skip('should paste the post to the G+ group', function(){
-
+        it.skip('should paste the post to the Slack group', function(){
+          const processing = new Processing(redis, gplus);
+          processing.getDetails(returnedUser);
+          sinon.assert.calledWith(unirest.send, "")
         })
+        
         it('should add the new post into the redis hash', function(){
           const processing = new Processing(redis, gplus);
           processing.getDetails(returnedUser);

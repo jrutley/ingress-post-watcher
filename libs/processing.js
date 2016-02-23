@@ -26,8 +26,7 @@ function Processing (redis, gplus) {
 
       self.redis.lrange(returnedUser, 0, -1, function(err, postIds){
         var missingPosts, existingPosts
-        console.log("PostIds")
-        console.log(postIds)
+
         if(postIds === undefined || postIds) {
           missingPosts = gPlusPosts
           existingPosts = []
@@ -37,6 +36,9 @@ function Processing (redis, gplus) {
         }
 
         missingPosts.forEach(gpp=>{
+
+          postComment(gpp)
+
           redis.lpush(returnedUser, gpp.postId)
           redis.hmset(
             // commentid, # of replies, post update date?
@@ -58,6 +60,10 @@ function Processing (redis, gplus) {
           })
         })
       })
+
+      function postComment(post){
+        
+      }
     });
   }
 }

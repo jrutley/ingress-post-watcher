@@ -6,7 +6,7 @@ const envVars = require('../env.conf.json');
 var source = Rx.Observable
 .interval(250 /* ms */)
 .timeInterval()
-.take(3)
+//.take(3)
 
 const apiKeys = envVars.API_KEYS;
 const redis = new Redis()
@@ -36,9 +36,10 @@ var subscription = source.subscribe(
   },
   () => {
     console.log('APP RX Completed');
-    Rx.Observable.fromEvent(connection, "idle").bufferWithTime(5000).subscribe(i=>{
+    var subscription = Rx.Observable.fromEvent(connection, "idle").bufferWithTime(5000).subscribe(i=>{
       console.log("APP redis idle")
-      redis.close(connection);
+      redis.close(connection)
+      subscription.dispose()
     });
   }
 );
