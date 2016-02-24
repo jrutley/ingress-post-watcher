@@ -57,6 +57,9 @@ function Redis(){
   self.hmset = function(key, args){
     connection.hmset(key, args)
   }
+  self.hset = function(key, args){
+    connection.hset(key, args)
+  }
 }
 
 module.exports = Redis

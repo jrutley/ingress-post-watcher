@@ -1,6 +1,35 @@
 var request = require('request')
 module.exports = Processing
 
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(searchElement /*, fromIndex*/ ) {
+    'use strict';
+    var O = Object(this);
+    var len = parseInt(O.length) || 0;
+    if (len === 0) {
+      return false;
+    }
+    var n = parseInt(arguments[1]) || 0;
+    var k;
+    if (n >= 0) {
+      k = n;
+    } else {
+      k = len + n;
+      if (k < 0) {k = 0;}
+    }
+    var currentElement;
+    while (k < len) {
+      currentElement = O[k];
+      if (searchElement === currentElement ||
+         (searchElement !== searchElement && currentElement !== currentElement)) { // NaN !== NaN
+        return true;
+      }
+      k++;
+    }
+    return false;
+  };
+}
+
 function Processing (redis, gplus) {
   const self = this;
   // hide "new"
@@ -28,14 +57,18 @@ function Processing (redis, gplus) {
         }
       })
 
-      self.redis.lrange(returnedUser, 0, -1, function(err, postIds){
+      self.redis.hgetall(returnedUser, function(err, allRedisPosts){
+        // postIds now flips between key and value for all post keys known to redis
+        // now we iterate through all of the G+ posts those keys
         var missingPosts, existingPosts
 
-        console.log(postIds)
-        if(postIds === undefined || postIds) {
+        if(allRedisPosts === null) {
           missingPosts = gPlusPosts
           existingPosts = []
         } else {
+          // postIds is a redis hash of <<userId (postId / "{replyCount: ###, timestamp: 2016-...T...Z}")
+          var postIds = Object.keys(allRedisPosts)
+
           missingPosts = gPlusPosts.filter(gpp=> !postIds.includes(gpp.postId))
           existingPosts = gPlusPosts.filter(gpp=> postIds.includes(gpp.postId))
         }
@@ -46,9 +79,10 @@ function Processing (redis, gplus) {
           redis.lpush(returnedUser, gpp.postId)
           redis.hmset(
             // commentid, # of replies, post update date?
+            returnedUser,
             gpp.postId,
-            "replies", gpp.replies,
-            "postDate", gpp.postDate
+            {replies: gpp.replies,
+            postDate: gpp.postDate}
           )
         })
 

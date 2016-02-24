@@ -56,99 +56,88 @@ describe('Given that we have received the next user from Redis', function(){
     }
   })
 
-  describe('When an individual record was not found in the keystore', ()=> {
-
-    beforeEach(function() {
-      redis.hmset = sinon.spy()
-      redis.lpush = sinon.spy()
-      sinon.stub(redis, 'lrange', function(key, min, max, replies){
-        replies(null, undefined)
-      })
-      sinon.stub(gplus.activities, 'list', function(params, callback) {
+  describe('When a user has no posts found in redis', function() {
+    it('should create a new hash with the user as the key, the post ID as the field, and description as the value', function(){
+      var sandbox = sinon.sandbox.create()
+      sandbox.spy(redis, 'hmset')
+      sandbox.stub(gplus.activities, 'list', function(params, callback) {
         callback(null, activityFeedSingle);
       })
-    })
-
-    afterEach(function() {
-      gplus.activities.list.restore()
-      redis.lrange.restore()
-    });
-
-    it('should insert a new redis hash with the results from the Slack comment list', function(){
+      sandbox.stub(redis, 'hgetall', function(user, replies){
+        replies(null, null)
+      })
 
       const processing = new Processing(redis, gplus);
-
       processing.getDetails(returnedUser);
 
-      // Should do two items here
-      sinon.assert.calledWith(redis.lpush,
-        returnedUser, activityFeedSingle.items[0].id
-      );
       sinon.assert.calledWith(redis.hmset,
-        activityFeedSingle.items[0].id,
-        'replies', activityFeedSingle.items[0].object.replies.totalItems,
-        'postDate', activityFeedSingle.items[0].updated
-      );
-    });
+        returnedUser, activityFeedSingle.items[0].id, {
+          postDate: activityFeedSingle.items[0].updated,
+          replies: activityFeedSingle.items[0].object.replies.totalItems
+        }
+      )
+      sandbox.restore()
+    })
   })
 
-  describe('When a record was found in the keystore', function() {
-
-    beforeEach(function() {
-      redis.hmset = sinon.spy();
-    });
-
-    afterEach(function() {
-    });
-
+  describe('When a post is already found in the keystore', function() {
     describe('and there are no new replies', function(){
       // this means "we compared the redis k/v with the activity list, and there's no changes"
       // aka the gplus.list call is the same as the k/v store
-      beforeEach(function() {
-        sinon.stub(redis, 'hgetall', function(key, replies){
-          replies(null, {
-            replies: 69,
-            postDate: '2015-12-11T19:45:31.331Z'
-          })
-        })
-
-        sinon.stub(gplus.activities, 'list', function(params, callback) {
-          callback(null, activityFeedSingle);
-        });
-      })
-      afterEach(function(){
-        redis.hgetall.restore();
-        gplus.activities.list.restore();
-      })
-
       it('will not update redis with any values', function(){
+        // Arrange
+        var sandbox = sinon.sandbox.create()
+        sandbox.spy(redis, 'hmset')
+        sandbox.stub(gplus.activities, 'list', function(params, callback) {
+          callback(null, activityFeedSingle);
+        })
+        var postData = JSON.stringify({
+          replies: 69,
+          postDate: '2015-12-11T19:45:31.331Z'
+        })
+        var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
+        sandbox.stub(redis, 'hgetall', function(user, replies){
+          replies(null, hgetallResult)
+        }).calledWith(returnedUser)
+
         const processing = new Processing(redis, gplus);
+        // Act
         processing.getDetails(returnedUser);
 
+        // Assert
+        sinon.assert.calledWith(redis.hgetall, returnedUser)
         sinon.assert.notCalled(redis.hmset);
+
+        sandbox.restore()
+      })
+      it('will not post to Slack', function(){
+        var sandbox = sinon.sandbox.create()
+        request.post = sandbox.spy()
+        sandbox.spy(redis, 'hmset')
+        sandbox.stub(gplus.activities, 'list', function(params, callback) {
+          callback(null, activityFeedSingle);
+        })
+        var postData = JSON.stringify({
+          replies: 69,
+          postDate: '2015-12-11T19:45:31.331Z'
+        })
+        var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
+        sandbox.stub(redis, 'hgetall', function(user, replies){
+          replies(null, hgetallResult)
+        }).calledWith(returnedUser)
+
+        const processing = new Processing(redis, gplus)
+        processing.getDetails(returnedUser)
+
+        sinon.assert.notCalled(request.post)
+        sandbox.restore()
       })
     })
 
-    describe('and the reply count was updated on a post', function() {
+    describe.skip('and the reply count was updated on a post', function() {
       var singlePost = 'z12yhxrrcpnuivqeb22sxfwpomzmihzls'
       beforeEach(function() {
-        sinon.stub(request, 'post')
-        sinon.stub(redis, 'hgetall', function(key, response){
-          var data =
-          {
-            replies: 65,
-            postDate: '2015-12-11T19:45:31.331Z'
-          };
-          response(null, data);
-        }).calledWith(singlePost);
 
-        sinon.stub(redis, 'lrange', function(key, min, max, response){
-          response(null, [activityFeedSingle.items[0].id])
-        })
-
-        sinon.stub(gplus.activities, 'list', function(params, callback) {
-          callback(null, activityFeedSingle);
-        });
       })
 
       afterEach(function(){
@@ -159,12 +148,36 @@ describe('Given that we have received the next user from Redis', function(){
       })
 
       it('will update the k/v hash with the updated post count', function(){
+        var sandbox = sinon.sandbox.create()
+        redis.hmset = sandbox.spy();
+        sandbox.stub(request, 'post')
+        sandbox.stub(redis, 'hgetall', function(key, response){
+          var data =
+          {
+            replies: 65,
+            postDate: '2015-12-11T19:45:31.331Z'
+          };
+          response(null, data);
+        }).calledWith(singlePost);
+
+        sandbox.stub(redis, 'lrange', function(key, min, max, response){
+          response(null, [activityFeedSingle.items[0].id])
+        })
+
+        sandbox.stub(gplus.activities, 'list', function(params, callback) {
+          callback(null, activityFeedSingle);
+        });
+
+
+
         const processing = new Processing(redis, gplus);
         processing.getDetails(returnedUser);
 
-        sinon.assert.calledWith(redis.hmset, singlePost,
+        sandbox.assert.calledWith(redis.hmset, singlePost,
           "replies", activityFeedSingle.items[0].object.replies.totalItems,
           "postDate", activityFeedSingle.items[0].updated)
+
+        sandbox.restore()
         })
 
         describe.skip('and the poster is ADA', function(){
@@ -180,23 +193,7 @@ describe('Given that we have received the next user from Redis', function(){
       describe('and when there is a new post', function() {
         // We know this because it's not in the k/v list
         beforeEach(function() {
-          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
-          sinon.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
-          sinon.stub(redis, 'lrange', function(key, min, max, response){
-            response(null, [activityFeedSingle.items[0].id])
-          })
-          sinon.stub(redis, 'hgetall', function(key, response){
-            var data =
-            {
-              //this is now the key:      postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
-              replies: 69,
-              postDate: '2015-12-11T19:45:31.331Z'
-            };
-            response(null, data);
-          });
-          sinon.stub(gplus.activities, 'list', function(params, callback) {
-            callback(null, activityFeedMulti);
-          });
+
         });
 
         afterEach(function(){
@@ -207,6 +204,28 @@ describe('Given that we have received the next user from Redis', function(){
         })
 
         it('should paste the post to the Slack group', function(){
+          var sandbox = sinon.sandbox.create()
+          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
+          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+          sandbox.stub(redis, 'lrange', function(key, min, max, response){
+            response(null, [activityFeedSingle.items[0].id])
+          })
+          sandbox.stub(redis, 'hgetall', function(key, response){
+            var data =
+            {
+              //this is now the key:      postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
+              replies: 69,
+              postDate: '2015-12-11T19:45:31.331Z'
+            };
+            response(null, data);
+          });
+          sandbox.stub(gplus.activities, 'list', function(params, callback) {
+            callback(null, activityFeedMulti);
+          });
+
+
+
+
           const processing = new Processing(redis, gplus);
           var slackUrl = 'https://my.slack.url.com/services/sample/id'
 
@@ -214,20 +233,42 @@ describe('Given that we have received the next user from Redis', function(){
 
           processing.getDetails(returnedUser, 'apiKey', slackUrl);
 
-          sinon.assert.calledWith(request.post, slackUrl, {
+          sandbox.assert.calledWith(request.post, slackUrl, {
             json: {text: `@channel: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
           })
+          sandbox.restore()
         })
 
         it('should add the new post into the redis hash', function(){
+          var sandbox = sinon.sandbox.create()
+          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
+          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+          sandbox.stub(redis, 'lrange', function(key, min, max, response){
+            response(null, [activityFeedSingle.items[0].id])
+          })
+          sandbox.stub(redis, 'hgetall', function(key, response){
+            var data =
+            {
+              //this is now the key:      postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
+              replies: 69,
+              postDate: '2015-12-11T19:45:31.331Z'
+            };
+            response(null, data);
+          });
+          sandbox.stub(gplus.activities, 'list', function(params, callback) {
+            callback(null, activityFeedMulti);
+          });
+
           const processing = new Processing(redis, gplus);
           processing.getDetails(returnedUser);
 
-          sinon.assert.calledWith(redis.hmset,
+          sandbox.assert.calledWith(redis.hmset,
             activityFeedMulti.items[1].id,
             'replies', activityFeedMulti.items[1].object.replies.totalItems,
             'postDate', activityFeedMulti.items[1].updated
           )
+
+          sandbox.restore()
         })
       })
     })
