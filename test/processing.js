@@ -112,7 +112,7 @@ describe('Given that we have received the next user from Redis', function(){
       })
       it('will not post to Slack', function(){
         var sandbox = sinon.sandbox.create()
-        request.post = sandbox.spy()
+        sandbox.spy(request, 'post')
         sandbox.spy(redis, 'hmset')
         sandbox.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedSingle);
@@ -136,20 +136,10 @@ describe('Given that we have received the next user from Redis', function(){
 
     describe.skip('and the reply count was updated on a post', function() {
       var singlePost = 'z12yhxrrcpnuivqeb22sxfwpomzmihzls'
-      beforeEach(function() {
-
-      })
-
-      afterEach(function(){
-        redis.hgetall.restore()
-        redis.lrange.restore()
-        gplus.activities.list.restore()
-        request.post.restore()
-      })
 
       it('will update the k/v hash with the updated post count', function(){
         var sandbox = sinon.sandbox.create()
-        redis.hmset = sandbox.spy();
+        sandbox.spy(redis, 'hmset');
         sandbox.stub(request, 'post')
         sandbox.stub(redis, 'hgetall', function(key, response){
           var data =
@@ -192,39 +182,25 @@ describe('Given that we have received the next user from Redis', function(){
       // Use that to iterate through all the values to find any reply updates, or if there are any posts that are not new
       describe('and when there is a new post', function() {
         // We know this because it's not in the k/v list
-        beforeEach(function() {
-
-        });
-
-        afterEach(function(){
-          redis.hgetall.restore()
-          gplus.activities.list.restore()
-          request.post.restore()
-          redis.lrange.restore()
-        })
+        // AKA 2+ Google posts, and only one Redis post
 
         it('should paste the post to the Slack group', function(){
           var sandbox = sinon.sandbox.create()
-          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
-          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
-          sandbox.stub(redis, 'lrange', function(key, min, max, response){
-            response(null, [activityFeedSingle.items[0].id])
-          })
-          sandbox.stub(redis, 'hgetall', function(key, response){
-            var data =
-            {
-              //this is now the key:      postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
-              replies: 69,
-              postDate: '2015-12-11T19:45:31.331Z'
-            };
-            response(null, data);
-          });
+          sandbox.spy(redis, 'hmset')
           sandbox.stub(gplus.activities, 'list', function(params, callback) {
             callback(null, activityFeedMulti);
-          });
+          })
+          var postData = JSON.stringify({
+            replies: 69,
+            postDate: '2015-12-11T19:45:31.331Z'
+          })
+          var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
+          sandbox.stub(redis, 'hgetall', function(user, replies){
+            replies(null, hgetallResult)
+          }).calledWith(returnedUser)
 
-
-
+          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
+          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
 
           const processing = new Processing(redis, gplus);
           var slackUrl = 'https://my.slack.url.com/services/sample/id'
@@ -233,7 +209,7 @@ describe('Given that we have received the next user from Redis', function(){
 
           processing.getDetails(returnedUser, 'apiKey', slackUrl);
 
-          sandbox.assert.calledWith(request.post, slackUrl, {
+          sinon.assert.calledWith(request.post, slackUrl, {
             json: {text: `@channel: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
           })
           sandbox.restore()

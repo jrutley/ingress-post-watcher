@@ -74,7 +74,7 @@ function Processing (redis, gplus) {
         }
 
         missingPosts.forEach(gpp=>{
-          //postComment(gpp, slackUrl)
+          postComment(gpp, slackUrl)
 
           redis.lpush(returnedUser, gpp.postId)
           redis.hmset(
@@ -100,10 +100,9 @@ function Processing (redis, gplus) {
       })
 
       function postComment(post, slackUrl){
-        // request.post(slackUrl, {
-        //   json: {text: `@channel: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
-        // }, function(error, response, body){})
-        console.log(`@channel: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`)
+        request.post(slackUrl, {
+          json: {text: `@channel: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
+        }, function(error, response, body){})
       }
     });
   }
