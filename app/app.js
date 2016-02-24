@@ -9,13 +9,11 @@ var source = Rx.Observable
 //.take(3)
 
 const apiKeys = envVars.API_KEYS;
-const redis = new Redis()
-var connection = null;
+var connection = null
 var subscription = source.subscribe(
   next => {
     if(connection === null){
-      connection = redis.open();
-
+      connection = new Redis()
       Rx.Observable.fromEvent(connection, "connect").subscribe(c=>{console.log("APP connect")});
       //Rx.Observable.fromEvent(connection, "idle").subscribe(i=>{console.log("APP redis idle")});
       Rx.Observable.fromEvent(connection, "reconnecting").subscribe(r => {
@@ -25,20 +23,21 @@ var subscription = source.subscribe(
       Rx.Observable.fromEvent(connection, "end").subscribe(e=>{console.log("APP redis end")});
       Rx.Observable.fromEvent(connection, "drain").subscribe(d=>{console.log("APP redis drain")});
     }
-    redis.rpoplpush(connection, "users", "users", (value)=>{
+    connection.rpoplpush("users", "users", (err, value)=>{
       app(apiKeys[next.value % apiKeys.length], value, connection);
     });
   },
   err => {
     console.log('APP RX Error: ' + err);
-    redis.close(connection);
-    connection = null;
+    connection.quit()
+    connection = null
   },
   () => {
     console.log('APP RX Completed');
     var subscription = Rx.Observable.fromEvent(connection, "idle").bufferWithTime(5000).subscribe(i=>{
       console.log("APP redis idle")
-      redis.close(connection)
+      connection.quit()
+      connection = null
       subscription.dispose()
     });
   }

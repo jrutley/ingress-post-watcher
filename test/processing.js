@@ -37,7 +37,6 @@ describe('Given that we have received the next user from Redis', function(){
     auth: function(pass){}
   }
   sinon.stub(redisLib, "createClient").returns(connection);
-  redis.open("server", "port", "password")
 
   it('should retrieve the activity list from Slack', function(){
     try{

@@ -74,29 +74,31 @@ function Processing (redis, gplus) {
         }
 
         missingPosts.forEach(gpp=>{
-          postComment(gpp, slackUrl)
+          //postComment(gpp, slackUrl)
+          console.log("POST TO SLACK")
+          console.log(gpp)
 
-          redis.lpush(returnedUser, gpp.postId)
+          //redis.lpush(returnedUser, gpp.postId)
           redis.hmset(
             // commentid, # of replies, post update date?
             returnedUser,
             gpp.postId,
-            {replies: gpp.replies,
-            postDate: gpp.postDate}
+            JSON.stringify({replies: gpp.replies,
+            postDate: gpp.postDate})
           )
         })
 
-        existingPosts.forEach(gpp=>{
-          redis.hgetall(gpp.postId, (err, storedPosts) =>{
-            if(gpp.replies > storedPosts.replies) {
-              redis.hmset(
-                gpp.postId,
-                "replies", activity.items[0].object.replies.totalItems,
-                "postDate", activity.items[0].updated
-              )
-            }
-          })
-        })
+        // existingPosts.forEach(gpp=>{
+        //   redis.hgetall(gpp.postId, (err, storedPosts) =>{
+        //     if(gpp.replies > storedPosts.replies) {
+        //       redis.hmset(
+        //         gpp.postId,
+        //         "replies", activity.items[0].object.replies.totalItems,
+        //         "postDate", activity.items[0].updated
+        //       )
+        //     }
+        //   })
+        // })
       })
 
       function postComment(post, slackUrl){
