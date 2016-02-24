@@ -217,31 +217,31 @@ describe('Given that we have received the next user from Redis', function(){
 
         it('should add the new post into the redis hash', function(){
           var sandbox = sinon.sandbox.create()
-          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
-          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
-          sandbox.stub(redis, 'lrange', function(key, min, max, response){
-            response(null, [activityFeedSingle.items[0].id])
-          })
-          sandbox.stub(redis, 'hgetall', function(key, response){
-            var data =
-            {
-              //this is now the key:      postId: 'z12yhxrrcpnuivqeb22sxfwpomzmihzls',
-              replies: 69,
-              postDate: '2015-12-11T19:45:31.331Z'
-            };
-            response(null, data);
-          });
+          sandbox.spy(redis, 'hmset')
           sandbox.stub(gplus.activities, 'list', function(params, callback) {
             callback(null, activityFeedMulti);
-          });
+          })
+          var postData = JSON.stringify({
+            replies: 69,
+            postDate: '2015-12-11T19:45:31.331Z'
+          })
+          var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
+
+          // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
+          sandbox.stub(redis, 'hgetall', function(user, replies){
+            replies(null, hgetallResult)
+          }).calledWith(returnedUser)
+
+          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
 
           const processing = new Processing(redis, gplus);
           processing.getDetails(returnedUser);
 
-          sandbox.assert.calledWith(redis.hmset,
-            activityFeedMulti.items[1].id,
-            'replies', activityFeedMulti.items[1].object.replies.totalItems,
-            'postDate', activityFeedMulti.items[1].updated
+          sinon.assert.calledWith(redis.hmset,
+            returnedUser, activityFeedMulti.items[1].id, {
+              postDate: activityFeedMulti.items[1].updated,
+              replies: activityFeedMulti.items[1].object.replies.totalItems
+            }
           )
 
           sandbox.restore()
