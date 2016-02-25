@@ -79,34 +79,33 @@ function Processing (redis, gplus) {
           // console.log("POST TO SLACK")
           // console.log(gpp)
 
-          //redis.lpush(returnedUser, gpp.postId)
-          redis.hmset(
-            // commentid, # of replies, post update date?
+          redis.hset(
+            // userId, commentid, {# of replies, post update date}
             returnedUser,
             gpp.postId,
-            JSON.stringify({replies: gpp.replies,
-              postDate: gpp.postDate})
-            )
-          })
-
-          // existingPosts.forEach(gpp=>{
-          //   redis.hgetall(gpp.postId, (err, storedPosts) =>{
-          //     if(gpp.replies > storedPosts.replies) {
-          //       redis.hmset(
-          //         gpp.postId,
-          //         "replies", activity.items[0].object.replies.totalItems,
-          //         "postDate", activity.items[0].updated
-          //       )
-          //     }
-          //   })
-          // })
+            JSON.stringify({replies: gpp.replies, postDate: gpp.postDate})
+          )
         })
 
-        function postComment(post, slackUrl){
-          request.post(slackUrl, {
-            json: {text: `@channel: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
-          }, function(error, response, body){})
-        }
-      });
-    }
+        existingPosts.forEach(gpp=>{
+          redis.hget(returnedUser, gpp.postId, (err, encodedPost) =>{
+            const storedPost = JSON.parse(encodedPost)
+            if(gpp.replies > storedPost.replies) {
+              redis.hset(
+                returnedUser,
+                gpp.postId,
+                JSON.stringify({replies: gpp.replies, postDate: gpp.postDate})
+              )
+            }
+          })
+        })
+      })
+
+      function postComment(post, slackUrl){
+        request.post(slackUrl, {
+          json: {text: `@channel: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
+        }, function(error, response, body){})
+      }
+    });
   }
+}
