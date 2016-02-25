@@ -70,11 +70,31 @@ describe('Given that we have received the next user from Redis', function(){
       processing.getDetails(returnedUser);
 
       sinon.assert.calledWith(redis.hmset,
-        returnedUser, activityFeedSingle.items[0].id, {
-          postDate: activityFeedSingle.items[0].updated,
-          replies: activityFeedSingle.items[0].object.replies.totalItems
-        }
+        returnedUser, activityFeedSingle.items[0].id, JSON.stringify({
+          replies: activityFeedSingle.items[0].object.replies.totalItems,
+          postDate: activityFeedSingle.items[0].updated
+        })
       )
+      sandbox.restore()
+    })
+    it('should not post these new posts to Slack', function(){
+      var sandbox = sinon.sandbox.create()
+      sandbox.spy(redis, 'hmset')
+      sandbox.stub(gplus.activities, 'list', function(params, callback) {
+        callback(null, activityFeedSingle);
+      })
+      sandbox.stub(redis, 'hgetall', function(user, replies){
+        replies(null, null)
+      })
+      sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+
+      var slackUrl = 'https://my.slack.url.com/services/sample/id'
+      const processing = new Processing(redis, gplus, slackUrl);
+      processing.getDetails(returnedUser);
+
+      sinon.assert.notCalled(request.post, slackUrl)//, {
+        //json: {text: `@channel: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
+      //})
       sandbox.restore()
     })
   })
@@ -166,7 +186,7 @@ describe('Given that we have received the next user from Redis', function(){
           "replies", activityFeedSingle.items[0].object.replies.totalItems,
           "postDate", activityFeedSingle.items[0].updated)
 
-        sandbox.restore()
+          sandbox.restore()
         })
 
         describe.skip('and the poster is ADA', function(){
@@ -237,10 +257,10 @@ describe('Given that we have received the next user from Redis', function(){
           processing.getDetails(returnedUser);
 
           sinon.assert.calledWith(redis.hmset,
-            returnedUser, activityFeedMulti.items[1].id, {
-              postDate: activityFeedMulti.items[1].updated,
-              replies: activityFeedMulti.items[1].object.replies.totalItems
-            }
+            returnedUser, activityFeedMulti.items[1].id, JSON.stringify({
+              replies: activityFeedMulti.items[1].object.replies.totalItems,
+              postDate: activityFeedMulti.items[1].updated
+            })
           )
 
           sandbox.restore()

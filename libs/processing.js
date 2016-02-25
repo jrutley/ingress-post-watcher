@@ -20,8 +20,7 @@ if (!Array.prototype.includes) {
     var currentElement;
     while (k < len) {
       currentElement = O[k];
-      if (searchElement === currentElement ||
-         (searchElement !== searchElement && currentElement !== currentElement)) { // NaN !== NaN
+      if (searchElement === currentElement || (searchElement !== searchElement && currentElement !== currentElement)) { // NaN !== NaN
         return true;
       }
       k++;
@@ -74,9 +73,11 @@ function Processing (redis, gplus) {
         }
 
         missingPosts.forEach(gpp=>{
-          //postComment(gpp, slackUrl)
-          console.log("POST TO SLACK")
-          console.log(gpp)
+          if(allRedisPosts !== null){
+            postComment(gpp, slackUrl)
+          }
+          // console.log("POST TO SLACK")
+          // console.log(gpp)
 
           //redis.lpush(returnedUser, gpp.postId)
           redis.hmset(
@@ -84,28 +85,28 @@ function Processing (redis, gplus) {
             returnedUser,
             gpp.postId,
             JSON.stringify({replies: gpp.replies,
-            postDate: gpp.postDate})
-          )
+              postDate: gpp.postDate})
+            )
+          })
+
+          // existingPosts.forEach(gpp=>{
+          //   redis.hgetall(gpp.postId, (err, storedPosts) =>{
+          //     if(gpp.replies > storedPosts.replies) {
+          //       redis.hmset(
+          //         gpp.postId,
+          //         "replies", activity.items[0].object.replies.totalItems,
+          //         "postDate", activity.items[0].updated
+          //       )
+          //     }
+          //   })
+          // })
         })
 
-        // existingPosts.forEach(gpp=>{
-        //   redis.hgetall(gpp.postId, (err, storedPosts) =>{
-        //     if(gpp.replies > storedPosts.replies) {
-        //       redis.hmset(
-        //         gpp.postId,
-        //         "replies", activity.items[0].object.replies.totalItems,
-        //         "postDate", activity.items[0].updated
-        //       )
-        //     }
-        //   })
-        // })
-      })
-
-      function postComment(post, slackUrl){
-        request.post(slackUrl, {
-          json: {text: `@channel: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
-        }, function(error, response, body){})
-      }
-    });
+        function postComment(post, slackUrl){
+          request.post(slackUrl, {
+            json: {text: `@channel: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
+          }, function(error, response, body){})
+        }
+      });
+    }
   }
-}
