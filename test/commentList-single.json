@@ -1,0 +1,41 @@
+{
+ "kind": "plus#commentFeed",
+ "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/jBCcc5y-RqDF6S4X7ujknRKvVPI\"",
+ "nextPageToken": "CBQQ-bONsrEq",
+ "title": "Google+ List of Comments for an Activity",
+ "items": [
+  {
+   "kind": "plus#comment",
+   "etag": "\"4OZ_Kt6ujOh1jaML_U6RM6APqoE/4BNYMxFKM9DxaHz-V0r2nvHlU6k\"",
+   "verb": "post",
+   "id": "z12yhxrrcpnuivqeb22sxfwpomzmihzls.1454458706247007",
+   "published": "2016-02-03T00:18:26.247Z",
+   "updated": "2016-02-03T00:18:26.247Z",
+   "actor": {
+    "id": "113497251609012710593",
+    "displayName": "Doni Satria",
+    "url": "https://plus.google.com/113497251609012710593",
+    "image": {
+     "url": "https://lh6.googleusercontent.com/-LpmuOwy8Yt8/AAAAAAAAAAI/AAAAAAAAClQ/R6PV_o1mc7A/photo.jpg?sz=50"
+    },
+    "verification": {
+     "adHocVerified": "UNKNOWN_VERIFICATION_STATUS"
+    }
+   },
+   "object": {
+    "objectType": "comment",
+    "content": "<span class=\"proflinkWrapper\"><span class=\"proflinkPrefix\">+</span><a class=\"proflink\" href=\"https://plus.google.com/114076692022231059864\" oid=\"114076692022231059864\">A Detection Algorithm</a></span> <span class=\"proflinkWrapper\"><span class=\"proflinkPrefix\">+</span><a class=\"proflink\" href=\"https://plus.google.com/105211554081025512763\" oid=\"105211554081025512763\">Niantic Project</a></span> hello, is it possible to capture portal today but the notification appear on comm tomorrow in everyone intel? (Like, the notification of an agent captured a portal delayed, captured on 15th jan, bit appear in comm on 16th jan)"
+   },
+   "selfLink": "https://content.googleapis.com/plus/v1/comments/z12yhxrrcpnuivqeb22sxfwpomzmihzls#1454458706247007",
+   "inReplyTo": [
+    {
+     "id": "z12yhxrrcpnuivqeb22sxfwpomzmihzls",
+     "url": "https://plus.google.com/+ADetectionAlgorithmADA/posts/CzbmSw8F7N3"
+    }
+   ],
+   "plusoners": {
+    "totalItems": 0
+   }
+  }
+ ]
+}

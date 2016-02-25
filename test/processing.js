@@ -9,6 +9,8 @@ var redisLib = require("redis")
 var google = require('googleapis')
 var gplus = google.plus('v1')
 var request = require('request')
+var commentListSingle = require('./commentList-single.json')
+const commentListSingleADA = require('./commentList-single-ADA.json')
 
 chai.should();
 
@@ -28,6 +30,7 @@ describe('Given that we have received the next user from Redis', function(){
   // We have made a call to Redis, and it returned our user
   //const returnedUser = "+ADetectionAlgorithmADA"; // the .id of what's stored in the users list
   const returnedUser = "114076692022231059864" // ADA's ID
+  var slackUrl = 'https://my.slack.url.com/services/sample/id'
   var redis = new Redis()
   var connection = {
     hgetall: function(key, response){},
@@ -153,16 +156,14 @@ describe('Given that we have received the next user from Redis', function(){
 
     describe('and the reply count was updated on a post', function() {
       var singlePost = 'z12yhxrrcpnuivqeb22sxfwpomzmihzls'
-
-      it('will update the k/v hash with the updated post count', function(){
-        var sandbox = sinon.sandbox.create()
+      var setup = (sandbox) => {
         sandbox.spy(redis, 'hset')
         sandbox.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedSingle);
         })
 
         var storedPostData = JSON.stringify({
-          replies: 65,
+          replies: 68,
           postDate: activityFeedSingle.items[0].updated
         })
         var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: storedPostData}
@@ -173,6 +174,11 @@ describe('Given that we have received the next user from Redis', function(){
         sandbox.stub(redis, 'hget', function(userId, postId, replies){
           replies(null, storedPostData)
         }).calledWith(returnedUser, activityFeedSingle.items[0].id)
+      }
+
+      it('will update the k/v hash with the updated post count', function(){
+        var sandbox = sinon.sandbox.create()
+        setup(sandbox)
 
         const processing = new Processing(redis, gplus);
         processing.getDetails(returnedUser);
@@ -188,8 +194,30 @@ describe('Given that we have received the next user from Redis', function(){
         sandbox.restore()
       })
 
-      describe.skip('and the poster is ADA', function(){
-        it.skip('post to Slack with the reply')
+      describe('and the poster is ADA', function(){
+        it('post to Slack with the reply', function(){
+          var sandbox = sinon.sandbox.create()
+
+          // Arrange
+          setup(sandbox)
+          // Make another call to G+ to get the comment List
+          sandbox.stub(gplus.comments, 'list', function(params, callback){
+            callback(null, commentListSingleADA)
+          })
+          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+          const adaReply = commentListSingleADA.items[0]
+
+          // Act
+          const processing = new Processing(redis, gplus);
+          processing.getDetails(returnedUser, 'apiKey', slackUrl);
+
+          // Assert
+          sinon.assert.calledWith(request.post, slackUrl, {
+            json: {text: `<@channel>: New comment from ${adaReply.actor.displayName} at ${adaReply.selfLink}`}
+          })
+
+          sandbox.restore()
+        })
       })
 
       describe.skip('and the poster is not ADA', function(){
@@ -221,14 +249,13 @@ describe('Given that we have received the next user from Redis', function(){
         sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
 
         const processing = new Processing(redis, gplus);
-        var slackUrl = 'https://my.slack.url.com/services/sample/id'
 
         var item1 = activityFeedMulti.items[1]
 
         processing.getDetails(returnedUser, 'apiKey', slackUrl);
 
         sinon.assert.calledWith(request.post, slackUrl, {
-          json: {text: `@channel: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
+          json: {text: `<@channel>: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
         })
         sandbox.restore()
       })
