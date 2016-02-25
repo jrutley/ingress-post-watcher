@@ -174,11 +174,15 @@ describe('Given that we have received the next user from Redis', function(){
         sandbox.stub(redis, 'hget', function(userId, postId, replies){
           replies(null, storedPostData)
         }).calledWith(returnedUser, activityFeedSingle.items[0].id)
+
       }
 
       it('will update the k/v hash with the updated post count', function(){
         var sandbox = sinon.sandbox.create()
         setup(sandbox)
+        sandbox.stub(gplus.comments, 'list', function(params, callback){
+          callback(null, commentListSingleADA)
+        })
 
         const processing = new Processing(redis, gplus);
         processing.getDetails(returnedUser);
@@ -193,7 +197,35 @@ describe('Given that we have received the next user from Redis', function(){
 
         sandbox.restore()
       })
+      it('will not update the k/v hash with the updated post count if we fail to retrieve the comments', function(){
+        var sandbox = sinon.sandbox.create()
+        setup(sandbox)
+        const error = {
+          code: 403,
+          errors: [
+            { domain: 'usageLimits',
+               reason: 'dailyLimitExceededUnreg',
+               message: 'Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.',
+               extendedHelp: 'https://code.google.com/apis/console'
+            }
+          ]
+        }
+        sandbox.stub(gplus.comments, 'list', function(params, callback){
+          callback(error, null)
+        })
+        const processing = new Processing(redis, gplus);
+        processing.getDetails(returnedUser);
 
+        var postHashValue = JSON.stringify({
+          replies: activityFeedSingle.items[0].object.replies.totalItems,
+          postDate: activityFeedSingle.items[0].updated
+        })
+        sinon.assert.neverCalledWith(redis.hset,
+          returnedUser, activityFeedSingle.items[0].id, postHashValue
+        )
+
+        sandbox.restore()
+      })
       describe('and the poster is ADA', function(){
         it('post to Slack with the reply', function(){
           var sandbox = sinon.sandbox.create()
@@ -218,6 +250,7 @@ describe('Given that we have received the next user from Redis', function(){
 
           sandbox.restore()
         })
+
       })
 
       describe.skip('and the poster is not ADA', function(){
@@ -262,6 +295,8 @@ describe('Given that we have received the next user from Redis', function(){
 
       it('should add the new post into the redis hash', function(){
         var sandbox = sinon.sandbox.create()
+
+        //Arrange
         sandbox.spy(redis, 'hset')
         sandbox.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedMulti);
@@ -278,10 +313,15 @@ describe('Given that we have received the next user from Redis', function(){
         }).calledWith(returnedUser)
 
         sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+        sandbox.stub(gplus.comments, 'list', function(params, callback){
+          callback(null, commentListSingleADA)
+        })
 
+        // Act
         const processing = new Processing(redis, gplus);
         processing.getDetails(returnedUser);
 
+        // Assert
         sinon.assert.calledWith(redis.hset,
           returnedUser, activityFeedMulti.items[1].id, JSON.stringify({
             replies: activityFeedMulti.items[1].object.replies.totalItems,
@@ -291,6 +331,8 @@ describe('Given that we have received the next user from Redis', function(){
 
         sandbox.restore()
       })
+
+
     })
   })
 })

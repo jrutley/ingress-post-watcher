@@ -102,13 +102,13 @@ function Processing (redis, gplus) {
                   res.items.forEach(i=>{
                     postReplyToSlack(i, slackUrl)
                   })
+                  redis.hset(
+                    returnedUser,
+                    gpp.postId,
+                    JSON.stringify({replies: gpp.replies, postDate: gpp.postDate})
+                  )
                 }
               })
-              redis.hset(
-                returnedUser,
-                gpp.postId,
-                JSON.stringify({replies: gpp.replies, postDate: gpp.postDate})
-              )
             }
           })
         })
