@@ -91,23 +91,26 @@ function Processing (redis, gplus) {
           redis.hget(returnedUser, gpp.postId, (err, encodedPost) =>{
             const storedPost = JSON.parse(encodedPost)
             if(gpp.replies > storedPost.replies) {
-              gplus.comments.list({
+              const commentQuery = {
+                auth: apiKey,
                 activityId: gpp.postId,
                 maxResults: gpp.replies - storedPost.replies,
                 sortOrder: 'descending'
-                }, function(err, res){
-                if(err){
-                  console.log(err)
-                } else {
-                  res.items.forEach(i=>{
-                    postReplyToSlack(i, slackUrl)
-                  })
-                  redis.hset(
-                    returnedUser,
-                    gpp.postId,
-                    JSON.stringify({replies: gpp.replies, postDate: gpp.postDate})
-                  )
+              }
+              // console.log(commentQuery)
+              gplus.comments.list(commentQuery, function(err, res){
+                if(err !== null){
+                  // console.log(err)
+                  return
                 }
+                res.items.forEach(i=>{
+                  postReplyToSlack(i, slackUrl)
+                })
+                redis.hset(
+                  returnedUser,
+                  gpp.postId,
+                  JSON.stringify({replies: gpp.replies, postDate: gpp.postDate})
+                )
               })
             }
           })
@@ -116,12 +119,12 @@ function Processing (redis, gplus) {
 
       function postComment(post, slackUrl){
         request.post(slackUrl, {
-          json: {text: `<@channel>: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
+          json: {text: `<!channel>: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
         }, function(error, response, body){})
       }
       function postReplyToSlack(commentItem, slackUrl){
         request.post(slackUrl, {
-          json: {text: `<@channel>: New comment from ${commentItem.actor.displayName} at ${commentItem.selfLink}`}
+          json: {text: `<!channel>: New comment from ${commentItem.actor.displayName} at ${commentItem.inReplyTo[0].url}. Message: ${commentItem.object.content}`}
         }, function(error, response, body){})
       }
     })

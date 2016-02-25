@@ -245,7 +245,7 @@ describe('Given that we have received the next user from Redis', function(){
 
           // Assert
           sinon.assert.calledWith(request.post, slackUrl, {
-            json: {text: `<@channel>: New comment from ${adaReply.actor.displayName} at ${adaReply.selfLink}`}
+            json: {text: `<!channel>: New comment from ${adaReply.actor.displayName} at ${adaReply.inReplyTo[0].url}. Message: ${adaReply.object.content}`}
           })
 
           sandbox.restore()
@@ -288,7 +288,7 @@ describe('Given that we have received the next user from Redis', function(){
         processing.getDetails(returnedUser, 'apiKey', slackUrl);
 
         sinon.assert.calledWith(request.post, slackUrl, {
-          json: {text: `<@channel>: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
+          json: {text: `<!channel>: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
         })
         sandbox.restore()
       })
