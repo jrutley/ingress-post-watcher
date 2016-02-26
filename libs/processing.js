@@ -38,7 +38,7 @@ function Processing (redis, gplus) {
   self.redis = redis
 
   // returnedUser is a G+ user
-  self.getDetails = (returnedUser, apiKey, slackUrl) => {
+  self.getDetails = (returnedUser, apiKey, slackUrl, allowedUsers) => {
 
     self.gplus.activities.list({auth: apiKey, userId: returnedUser, collection: 'public'}, function(err,activity){
       if(err !== null){
@@ -104,7 +104,7 @@ function Processing (redis, gplus) {
                   return
                 }
                 res.items.forEach(i=>{
-                  postReplyToSlack(i, slackUrl)
+                  postReplyToSlack(i, slackUrl, allowedUsers)
                 })
                 redis.hset(
                   returnedUser,
@@ -122,10 +122,13 @@ function Processing (redis, gplus) {
           json: {text: `<!channel>: New post from ${post.poster} titled "${post.postTitle}"\n${post.url}`}
         }, function(error, response, body){})
       }
-      function postReplyToSlack(commentItem, slackUrl){
+      function postReplyToSlack(commentItem, slackUrl, allowedUsers){
+        if(!allowedUsers || // allow anybody if we don't pass this in)
+        allowedUsers.includes(commentItem.actor.id)) {
         request.post(slackUrl, {
           json: {text: `<!channel>: New comment from ${commentItem.actor.displayName} at ${commentItem.inReplyTo[0].url}. Message: ${commentItem.object.content}`}
         }, function(error, response, body){})
+      }
       }
     })
   }

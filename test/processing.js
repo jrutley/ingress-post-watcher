@@ -1,15 +1,15 @@
-var chai = require("chai");
-var sinon = require("sinon");
-var Processing = require("../libs/processing.js");
-var assert = require("assert");
-var activityFeedMulti = require("./activityFeed-multi.json");
-var activityFeedSingle = require("./activityFeed-single.json");
-var Redis = require("../libs/redis-access.js")
-var redisLib = require("redis")
-var google = require('googleapis')
-var gplus = google.plus('v1')
-var request = require('request')
-var commentListSingle = require('./commentList-single.json')
+const chai = require("chai");
+const sinon = require("sinon");
+const Processing = require("../libs/processing.js");
+const assert = require("assert");
+const activityFeedMulti = require("./activityFeed-multi.json");
+const activityFeedSingle = require("./activityFeed-single.json");
+const Redis = require("../libs/redis-access.js")
+const redisLib = require("redis")
+const google = require('googleapis')
+const gplus = google.plus('v1')
+const request = require('request')
+const commentListSingle = require('./commentList-single.json')
 const commentListSingleADA = require('./commentList-single-ADA.json')
 
 chai.should();
@@ -26,46 +26,43 @@ chai.should();
 // Query Redis for that individual's record
 // Pass that record into this function
 
-describe('Given that we have received the next user from Redis', function(){
+describe('Given that we are processing the next user in the list', function(){
   // We have made a call to Redis, and it returned our user
   //const returnedUser = "+ADetectionAlgorithmADA"; // the .id of what's stored in the users list
   const returnedUser = "114076692022231059864" // ADA's ID
   var slackUrl = 'https://my.slack.url.com/services/sample/id'
-  var redis = new Redis()
+
   var connection = {
     hgetall: function(key, response){},
     lrange: function(key, min, max, response){},
     lpush: function(key, value, response){},
     hset: function(key, args){},
+    hget: function(key, h, response){},
     auth: function(pass){}
   }
   sinon.stub(redisLib, "createClient").returns(connection);
+  var redis = Redis('localhost', 12345, 'password')
 
-  it('should retrieve the activity list from Slack', function(){
-    try{
-      sinon.spy(gplus.activities, 'list');
+  it('should retrieve the activity list from G+', sinon.test(function(){
+    this.spy(gplus.activities, 'list');
 
-      const apiKey = 'myApiKey'
-      const processing = new Processing(redis, gplus);
-      processing.getDetails(returnedUser, apiKey);
-      assert(gplus.activities.list.calledWith({
-        auth: apiKey,
-        userId : returnedUser,
-        collection : 'public'
-      }));
-    } finally {
-      gplus.activities.list.restore()
-    }
-  })
+    const apiKey = 'myApiKey'
+    const processing = new Processing(redis, gplus);
+    processing.getDetails(returnedUser, apiKey);
+    assert(gplus.activities.list.calledWith({
+      auth: apiKey,
+      userId : returnedUser,
+      collection : 'public'
+    }));
+  }))
 
-  describe('When a user has no posts found in redis', function() {
-    it('should create a new hash with the user as the key, the post ID as the field, and description as the value', function(){
-      var sandbox = sinon.sandbox.create()
-      sandbox.spy(redis, 'hset')
-      sandbox.stub(gplus.activities, 'list', function(params, callback) {
+  describe('When a user has no posts found in the data store', function() {
+    it('should create a new record for that user, with the user\'s # as the key, the post # as the field, and description as the value', sinon.test(function(){
+      this.spy(redis, 'hset')
+      this.stub(gplus.activities, 'list', function(params, callback) {
         callback(null, activityFeedSingle);
       })
-      sandbox.stub(redis, 'hgetall', function(user, replies){
+      this.stub(redis, 'hgetall', function(user, replies){
         replies(null, null)
       })
 
@@ -78,37 +75,33 @@ describe('Given that we have received the next user from Redis', function(){
           postDate: activityFeedSingle.items[0].updated
         })
       )
-      sandbox.restore()
-    })
-    it('should not post these new posts to Slack', function(){
-      var sandbox = sinon.sandbox.create()
-      sandbox.spy(redis, 'hset')
-      sandbox.stub(gplus.activities, 'list', function(params, callback) {
+    }))
+    it('should not post these new posts to Slack', sinon.test(function(){
+      this.spy(redis, 'hset')
+      this.stub(gplus.activities, 'list', function(params, callback) {
         callback(null, activityFeedSingle);
       })
-      sandbox.stub(redis, 'hgetall', function(user, replies){
+      this.stub(redis, 'hgetall', function(user, replies){
         replies(null, null)
       })
-      sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+      this.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
 
       var slackUrl = 'https://my.slack.url.com/services/sample/id'
       const processing = new Processing(redis, gplus, slackUrl);
       processing.getDetails(returnedUser);
 
       sinon.assert.notCalled(request.post, slackUrl)
-      sandbox.restore()
-    })
+    }))
   })
 
   describe('When a post is already found in the keystore', function() {
     describe('and there are no new replies', function(){
       // this means "we compared the redis k/v with the activity list, and there's no changes"
       // aka the gplus.list call is the same as the k/v store
-      it('will not update redis with any values', function(){
+      it('will not update redis with any values', sinon.test(function(){
         // Arrange
-        var sandbox = sinon.sandbox.create()
-        sandbox.spy(redis, 'hset')
-        sandbox.stub(gplus.activities, 'list', function(params, callback) {
+        this.spy(redis, 'hset')
+        this.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedSingle);
         })
         var postData = JSON.stringify({
@@ -116,7 +109,7 @@ describe('Given that we have received the next user from Redis', function(){
           postDate: '2015-12-11T19:45:31.331Z'
         })
         var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
-        sandbox.stub(redis, 'hgetall', function(user, replies){
+        this.stub(redis, 'hgetall', function(user, replies){
           replies(null, hgetallResult)
         }).calledWith(returnedUser)
 
@@ -127,14 +120,12 @@ describe('Given that we have received the next user from Redis', function(){
         // Assert
         sinon.assert.calledWith(redis.hgetall, returnedUser)
         sinon.assert.notCalled(redis.hset);
+      }))
 
-        sandbox.restore()
-      })
-      it('will not post to Slack', function(){
-        var sandbox = sinon.sandbox.create()
-        sandbox.spy(request, 'post')
-        sandbox.spy(redis, 'hset')
-        sandbox.stub(gplus.activities, 'list', function(params, callback) {
+      it('will not post to Slack', sinon.test(function(){
+        this.spy(request, 'post')
+        this.spy(redis, 'hset')
+        this.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedSingle);
         })
         var postData = JSON.stringify({
@@ -142,7 +133,7 @@ describe('Given that we have received the next user from Redis', function(){
           postDate: '2015-12-11T19:45:31.331Z'
         })
         var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
-        sandbox.stub(redis, 'hgetall', function(user, replies){
+        this.stub(redis, 'hgetall', function(user, replies){
           replies(null, hgetallResult)
         }).calledWith(returnedUser)
 
@@ -150,8 +141,7 @@ describe('Given that we have received the next user from Redis', function(){
         processing.getDetails(returnedUser)
 
         sinon.assert.notCalled(request.post)
-        sandbox.restore()
-      })
+      }))
     })
 
     describe('and the reply count was updated on a post', function() {
@@ -197,24 +187,24 @@ describe('Given that we have received the next user from Redis', function(){
 
         sandbox.restore()
       })
-      it('will not update the k/v hash with the updated post count if we fail to retrieve the comments', function(){
-        var sandbox = sinon.sandbox.create()
-        setup(sandbox)
+      it('will not update the k/v hash with the updated post count if we fail to retrieve the comments', sinon.test(function(){
+        setup(this)
         const error = {
           code: 403,
-          errors: [
-            { domain: 'usageLimits',
-               reason: 'dailyLimitExceededUnreg',
-               message: 'Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.',
-               extendedHelp: 'https://code.google.com/apis/console'
-            }
-          ]
-        }
-        sandbox.stub(gplus.comments, 'list', function(params, callback){
+          errors: [{ domain: 'usageLimits',
+          reason: 'dailyLimitExceededUnreg',
+          message: 'Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.',
+          extendedHelp: 'https://code.google.com/apis/console'
+        }]}
+        this.stub(gplus.comments, 'list', function(params, callback){
           callback(error, null)
         })
+        // I don't want to mess up my pretty Mocha output
+        this.stub(console, 'log')
+
         const processing = new Processing(redis, gplus);
         processing.getDetails(returnedUser);
+
 
         var postHashValue = JSON.stringify({
           replies: activityFeedSingle.items[0].object.replies.totalItems,
@@ -223,20 +213,16 @@ describe('Given that we have received the next user from Redis', function(){
         sinon.assert.neverCalledWith(redis.hset,
           returnedUser, activityFeedSingle.items[0].id, postHashValue
         )
-
-        sandbox.restore()
-      })
+      }))
       describe('and the poster is ADA', function(){
-        it('post to Slack with the reply', function(){
-          var sandbox = sinon.sandbox.create()
-
+        it('post to Slack with the reply', sinon.test(function(){
           // Arrange
-          setup(sandbox)
+          setup(this)
           // Make another call to G+ to get the comment List
-          sandbox.stub(gplus.comments, 'list', function(params, callback){
+          this.stub(gplus.comments, 'list', function(params, callback){
             callback(null, commentListSingleADA)
           })
-          sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+          this.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
           const adaReply = commentListSingleADA.items[0]
 
           // Act
@@ -247,14 +233,30 @@ describe('Given that we have received the next user from Redis', function(){
           sinon.assert.calledWith(request.post, slackUrl, {
             json: {text: `<!channel>: New comment from ${adaReply.actor.displayName} at ${adaReply.inReplyTo[0].url}. Message: ${adaReply.object.content}`}
           })
-
-          sandbox.restore()
-        })
+        }))
 
       })
 
-      describe.skip('and the poster is not ADA', function(){
-        it.skip('will not post to Slack')
+      describe('and the poster is not ADA', function(){
+        it('will not post to Slack', sinon.test(function(){
+          // Arrange
+          setup(this)
+          // Make another call to G+ to get the comment List
+          this.stub(gplus.comments, 'list', function(params, callback){
+            callback(null, commentListSingle)
+          })
+          this.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+          const nonAdaReply = commentListSingle.items[0]
+
+          // Act
+          const processing = new Processing(redis, gplus);
+          processing.getDetails(returnedUser, 'apiKey', slackUrl, ['+ADetectionAlgorithmADA', returnedUser]);
+
+          // Assert
+          sinon.assert.neverCalledWith(request.post, slackUrl, {
+            json: {text: `<!channel>: New comment from ${nonAdaReply.actor.displayName} at ${nonAdaReply.inReplyTo[0].url}. Message: ${nonAdaReply.object.content}`}
+          })
+        }))
       })
     })
 
@@ -263,10 +265,9 @@ describe('Given that we have received the next user from Redis', function(){
       // We know this because it's not in the k/v list
       // AKA 2+ Google posts, and only one Redis post
 
-      it('should paste the post to the Slack group', function(){
-        var sandbox = sinon.sandbox.create()
-        sandbox.spy(redis, 'hset')
-        sandbox.stub(gplus.activities, 'list', function(params, callback) {
+      it('should paste the post to the Slack group', sinon.test(function(){
+        this.spy(redis, 'hset')
+        this.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedMulti);
         })
         var postData = JSON.stringify({
@@ -274,12 +275,12 @@ describe('Given that we have received the next user from Redis', function(){
           postDate: '2015-12-11T19:45:31.331Z'
         })
         var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
-        sandbox.stub(redis, 'hgetall', function(user, replies){
+        this.stub(redis, 'hgetall', function(user, replies){
           replies(null, hgetallResult)
         }).calledWith(returnedUser)
 
         // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
-        sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+        this.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
 
         const processing = new Processing(redis, gplus);
 
@@ -290,15 +291,12 @@ describe('Given that we have received the next user from Redis', function(){
         sinon.assert.calledWith(request.post, slackUrl, {
           json: {text: `<!channel>: New post from ${item1.actor.displayName} titled "${item1.title}"\n${item1.url}`}
         })
-        sandbox.restore()
-      })
+      }))
 
-      it('should add the new post into the redis hash', function(){
-        var sandbox = sinon.sandbox.create()
-
+      it('should add the new post into the redis hash', sinon.test(function(){
         //Arrange
-        sandbox.spy(redis, 'hset')
-        sandbox.stub(gplus.activities, 'list', function(params, callback) {
+        this.spy(redis, 'hset')
+        this.stub(gplus.activities, 'list', function(params, callback) {
           callback(null, activityFeedMulti);
         })
         var postData = JSON.stringify({
@@ -308,12 +306,12 @@ describe('Given that we have received the next user from Redis', function(){
         var hgetallResult = {z12yhxrrcpnuivqeb22sxfwpomzmihzls: postData}
 
         // ONLY RETURN A SINGLE POST HERE. We want to pretend that Redis only has one entry
-        sandbox.stub(redis, 'hgetall', function(user, replies){
+        this.stub(redis, 'hgetall', function(user, replies){
           replies(null, hgetallResult)
         }).calledWith(returnedUser)
 
-        sandbox.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
-        sandbox.stub(gplus.comments, 'list', function(params, callback){
+        this.stub(request, 'post').yields(null, {statusCode: 200}, 'ok')
+        this.stub(gplus.comments, 'list', function(params, callback){
           callback(null, commentListSingleADA)
         })
 
@@ -328,11 +326,7 @@ describe('Given that we have received the next user from Redis', function(){
             postDate: activityFeedMulti.items[1].updated
           })
         )
-
-        sandbox.restore()
-      })
-
-
+      }))
     })
   })
 })

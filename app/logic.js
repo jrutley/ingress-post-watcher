@@ -28,60 +28,7 @@ function App(apiKey, user, redis) {
   const userId = JSON.parse(user);
   console.log("\"Parsing\" user... " + user);
   var processing = Processing(redis, plus)
-  processing.getDetails(userId.id, apiKey, envVars.slackUrl)
-return;
-
-  var request = plus.activities.list({
-    auth: apiKey,
-    userId : userId.id,//'+ADetectionAlgorithmADA',
-    collection : 'public'
-  }, function(err, resp) {
-
-    const counts = countMap.get(apiKey);
-
-    if(err !== null){
-      console.log("ERROR!");
-      console.log(err);
-      counts.failCount++;
-      if(counts.failCount > 51){
-        fs.close(fileDescriptor, () => {
-          console.log("File closed");
-          process.exit(0);
-        });
-      }
-    } else {
-      counts.successCount++;
-
-      if(resp.items === null){
-        console.log("Bailing out... " + resp);
-        return;
-      }
-      // var numItems = resp.items.length;
-      // for (var i = 0; i < numItems; i++) {
-      //   var id = resp.items[i].id;
-      //   console.log('ID: ' + id + 'Actor: ' + resp.items[i].actor.displayName + ' Content: ' +
-      //   resp.items[i].object.content);
-      //   var commentRequest = plus.comments.list({
-      //     auth: TEST_API_KEY,
-      //     activityId: id
-      //   }, function(err, resp){
-      //     if(err !== null){
-      //       console.log("Failed to get comment list for " + id);
-      //       // continue;
-      //     }
-      //     console.log(resp);
-      //   });
-      // }
-    }
-    const output = moment().format('h:mm:ss a') + " " + userId.username + " " + " Fail count: " + counts.failCount + " Success count: " + counts.successCount + " " + apiKey;
-    console.log(output);
-
-    if(err !== null && counts.failCount < 50){
-      fs.write(fileDescriptor, output + "\n", ()=>{
-        console.log("wrote to file");
-      })
-    }
-  });
-};
+  processing.getDetails(userId.id, apiKey, envVars.slackUrl, envVars.replyUsers)
+}
 
 module.exports = App;
