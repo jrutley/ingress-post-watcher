@@ -1,17 +1,13 @@
-const users = require('./plususers.json');
+const users = require('./ver.json');
+console.log("Importing Redis");
 const redis = require('../libs/redis-access.js');
 const Rx = require('rx')
-
-// redis.execute( (connection) => {
-//   users.users.forEach(u=> {
-//     connection.rpush("users", JSON.stringify(u));
-//   });
-// })
 
 var connection = null;
 try {
   connection = redis();
   users.users.forEach(u=> {
+    console.log(u);
     connection.rpush("users", JSON.stringify(u));
   });
 }
