@@ -13,11 +13,17 @@ function Redis(server, port, pass){
       port: port || envVars.REDIS_PORT,
       host: server || envVars.REDIS_SERVER
     };
+    console.log("REDIS: opening on " + args.host + ":"+ args.port);
     connection = redis.createClient(args);
 
     console.log("REDIS: open on " + args.host + ":"+ args.port);
 
-    connection.auth(pass || envVars.REDIS_PASS);
+    var redisAuth = pass || envVars.REDIS_PASS;
+    if(redisAuth){
+      connection.auth(pass || envVars.REDIS_PASS);
+    } else {
+      console.log("No Redis authentication");
+    }
 
     return connection;
   }
